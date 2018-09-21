@@ -8,6 +8,7 @@ const menus = [
       {
         path: '/dashboard/analysis',
         name: 'analysis',
+        authority: ['user'],
       },
       {
         path: '/dashboard/monitor',
@@ -166,7 +167,9 @@ const menus = [
       },
     ],
   },
-
+  {
+    component: '404',
+  },
 
 ];
 

@@ -71,13 +71,7 @@ const query = {
 };
 
 class BasicLayout extends React.PureComponent {
-  constructor(props) {
-    super(props);
-    this.getPageTitle = memoizeOne(this.getPageTitle);
-    this.getBreadcrumbNameMap = memoizeOne(this.getBreadcrumbNameMap, isEqual);
-    this.breadcrumbNameMap = this.getBreadcrumbNameMap();
-    this.matchParamsPath =  memoizeOne(this.matchParamsPath, isEqual);
-  }
+
 
   state = {
     rendering: true,
@@ -139,20 +133,14 @@ class BasicLayout extends React.PureComponent {
     return formatter(menuData);
   }
 
-  getRouts(){
+
+
+  getRoutes() {
     const {
       route: { routes },
     } = this.props;
     return formatter(routes);
   }
-
-/* 
-  getMenuData() {
-    const {
-      route: { routes },
-    } = this.props;
-    return formatter(routes);
-  } */
 
   /**
    * 获取面包屑映射
@@ -169,7 +157,8 @@ class BasicLayout extends React.PureComponent {
         routerMap[menuItem.path] = menuItem;
       });
     };
-    mergeMenuAndRouter(this.getRouts());
+
+    mergeMenuAndRouter(this.getMenuData());
     return routerMap;
   }
 
@@ -237,10 +226,15 @@ class BasicLayout extends React.PureComponent {
     const { isMobile } = this.state;
     const isTop = PropsLayout === 'topmenu';
     const menuData = this.getMenuData();
-    const routerConfig = this.matchParamsPath(pathname);
     if(menuData.length===0){
       return null; 
     };
+    this.getPageTitle = memoizeOne(this.getPageTitle);
+    this.getBreadcrumbNameMap = memoizeOne(this.getBreadcrumbNameMap, isEqual);
+    this.breadcrumbNameMap = this.getBreadcrumbNameMap();
+    this.matchParamsPath =  memoizeOne(this.matchParamsPath, isEqual);
+    const routerConfig = this.matchParamsPath(pathname);
+   
     const layout = (
       <Layout>
         {isTop && !isMobile ? null : (

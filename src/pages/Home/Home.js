@@ -14,6 +14,7 @@ import PageHeaderWrapper from '@/components/PageHeaderWrapper';
     const { dispatch } = this.props;
     dispatch({
       type: 'home/fetchBasic',
+
     });
   }
 

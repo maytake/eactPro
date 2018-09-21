@@ -125,8 +125,11 @@ export async function getFakeCaptcha(mobile) {
   return request(`/api/captcha?mobile=${mobile}`);
 }
 
-export async function queryHomeDec() {
-  return request('/home/dec');
+export async function queryHomeDec(params) {
+  return request('/home/dec',{
+    method: 'POST',
+    body: params,
+  });
 }
 
 export async function queryRoutes() {

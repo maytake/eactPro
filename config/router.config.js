@@ -26,6 +26,11 @@ export default [
         component: './Home/Home',
       },
       {
+        path: '/changepassword',
+        name: 'changepassword',
+        component: './ChangePassword/ChangePassword',
+      },
+      {
         path: '/dashboard',
         name: 'dashboard',
         icon: 'dashboard',
@@ -34,6 +39,7 @@ export default [
             path: '/dashboard/analysis',
             name: 'analysis',
             component: './Dashboard/Analysis',
+            authority: ['user'],
           },
           {
             path: '/dashboard/monitor',
@@ -260,6 +266,7 @@ export default [
               },
             ],
           },
+          
         ],
       },
       {

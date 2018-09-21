@@ -78,6 +78,7 @@ export default {
         status: 'ok',
         type,
         currentAuthority: 'admin',
+        token: 'ebde19eaf',
       });
       return;
     }
@@ -86,6 +87,7 @@ export default {
         status: 'ok',
         type,
         currentAuthority: 'user',
+        token: 'ebde19eaf',
       });
       return;
     }

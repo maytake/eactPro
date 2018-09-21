@@ -21,6 +21,7 @@ export default {
       });
       // Login successfully
       if (response.status === 'ok') {
+        localStorage.setItem('userToken',response.token);
         reloadAuthorized();
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();
@@ -53,6 +54,7 @@ export default {
           currentAuthority: 'guest',
         },
       });
+      localStorage.removeItem('userToken');
       reloadAuthorized();
       yield put(
         routerRedux.push({

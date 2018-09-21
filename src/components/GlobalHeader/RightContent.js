@@ -51,18 +51,11 @@ export default class GlobalHeaderRight extends PureComponent {
     } = this.props;
     const menu = (
       <Menu className={styles.menu} selectedKeys={[]} onClick={onMenuClick}>
-        <Menu.Item key="userCenter">
+        <Menu.Item key="ChangePassword">
           <Icon type="user" />
-          <span>个人中心</span>
+          <span>修改密码</span>
         </Menu.Item>
-        <Menu.Item key="userinfo">
-          <Icon type="setting" />
-          <span>个人设置</span>
-        </Menu.Item>
-        <Menu.Item key="triggerError">
-          <Icon type="close-circle" />
-          <span>触发报错</span>
-        </Menu.Item>
+
         <Menu.Divider />
         <Menu.Item key="logout">
           <Icon type="logout" />
@@ -88,17 +81,7 @@ export default class GlobalHeaderRight extends PureComponent {
             console.log('enter', value); // eslint-disable-line
           }}
         />
-        <Tooltip title="使用文档">
-          <a
-            target="_blank"
-            href="https://pro.ant.design/docs/getting-started"
-            rel="noopener noreferrer"
-            className={styles.action}
-            title="使用文档"
-          >
-            <Icon type="question-circle-o" />
-          </a>
-        </Tooltip>
+       
         <NoticeIcon
           className={styles.action}
           count={currentUser.notifyCount}

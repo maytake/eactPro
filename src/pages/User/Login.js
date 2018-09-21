@@ -5,7 +5,7 @@ import { Checkbox, Alert, Icon } from 'antd';
 import Login from '@/components/Login';
 import styles from './Login.less';
 
-const { Tab, UserName, Password, Mobile, Captcha, Submit } = Login;
+const {  UserName, Password,  Submit } = Login;
 
 export default
 @connect(({ login, loading }) => ({

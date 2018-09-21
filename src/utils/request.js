@@ -73,6 +73,10 @@ export default function request(
    * Produce fingerprints based on url and parameters
    * Maybe url has the same parameters
    */
+ /*  options.body = Object.assign({}, options.body, {
+		token: localStorage.getItem('userToken')
+  }); */
+
   const fingerprint = url + (options.body ? JSON.stringify(options.body) : '');
   const hashcode = hash
     .sha256()
@@ -83,6 +87,7 @@ export default function request(
     credentials: 'include',
   };
   const newOptions = { ...defaultOptions, ...options };
+
   if (
     newOptions.method === 'POST' ||
     newOptions.method === 'PUT' ||
@@ -94,6 +99,7 @@ export default function request(
         'Content-Type': 'application/json; charset=utf-8',
         ...newOptions.headers,
       };
+      newOptions.body={...newOptions.body,token: localStorage.getItem('userToken')}
       newOptions.body = JSON.stringify(newOptions.body);
     } else {
       // newOptions.body is FormData
