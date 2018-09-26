@@ -1,5 +1,15 @@
 const menus = [
-
+  {
+    path: '/system',
+    name: '系统管理',
+    icon: 'setting',
+    routes: [
+      {
+        path: '/system/role',
+        name: '角色管理',
+      },
+    ],
+  },
   {
     path: '/dashboard',
     name: 'dashboard',
@@ -18,7 +28,7 @@ const menus = [
         path: '/dashboard/workplace',
         name: 'workplace',
       },
-
+      
     ],
   },
   // forms

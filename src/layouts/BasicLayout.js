@@ -158,7 +158,7 @@ class BasicLayout extends React.PureComponent {
       });
     };
 
-    mergeMenuAndRouter(this.getMenuData());
+    mergeMenuAndRouter(this.getRoutes());
     return routerMap;
   }
 

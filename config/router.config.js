@@ -31,6 +31,24 @@ export default [
         component: './ChangePassword/ChangePassword',
       },
       {
+        path: '/system',
+        name: '系统管理',
+        icon: 'setting',
+        routes: [
+          {
+            path: '/system/role',
+            name: '角色管理',
+            component: './System/Role',
+          },
+          {
+            path: '/system/role/addrole',
+            name: '添加角色',
+            component: './System/AddRole',
+          },
+        ],
+      },
+
+      {
         path: '/dashboard',
         name: 'dashboard',
         icon: 'dashboard',
@@ -266,7 +284,7 @@ export default [
               },
             ],
           },
-          
+
         ],
       },
       {
