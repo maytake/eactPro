@@ -18,7 +18,7 @@ export default [
     authority: ['admin', 'user'],
     routes: [
       // dashboard
-      { path: '/', redirect: '/dashboard/analysis' },
+      { path: '/', redirect: '/system/role' },
       {
         path: '/home',
         name: 'home',
@@ -39,6 +39,16 @@ export default [
             path: '/system/role',
             name: '角色管理',
             component: './System/Role',
+          },
+          {
+            path: '/system/user',
+            name: '用户管理',
+            component: './System/User',
+          },
+          {
+            path: '/system/resource',
+            name: '资源管理',
+            component: './System/Resource',
           },
           {
             path: '/system/role/addrole',

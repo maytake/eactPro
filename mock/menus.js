@@ -8,6 +8,14 @@ const menus = [
         path: '/system/role',
         name: '角色管理',
       },
+      {
+        path: '/system/user',
+        name: '用户管理',
+      },
+      {
+        path: '/system/resource',
+        name: '资源管理',
+      },
     ],
   },
   {

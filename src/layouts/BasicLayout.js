@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout } from 'antd';
+import { Layout, BackTop } from 'antd';
 import DocumentTitle from 'react-document-title';
 import isEqual from 'lodash/isEqual';
 import memoizeOne from 'memoize-one';
@@ -277,10 +277,12 @@ class BasicLayout extends React.PureComponent {
             {params => (
               <Context.Provider value={this.getContext()}>
                 <div className={classNames(params)}>{layout}</div>
+                <BackTop />
               </Context.Provider>
             )}
           </ContainerQuery>
         </DocumentTitle>
+        
         {this.renderSettingDrawer()}
       </React.Fragment>
     );
