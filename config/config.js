@@ -75,7 +75,7 @@ export default {
     },
   },
   manifest: {
-    name: 'ant-design-pro',
+    name: '盈众乐橙会员管理平台',
     background_color: '#FFF',
     description: 'An out-of-box UI solution for enterprise applications as a React boilerplate.',
     display: 'standalone',

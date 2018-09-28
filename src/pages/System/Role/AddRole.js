@@ -13,11 +13,8 @@ import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './AddRole.less';
 import RoleTree from '@/components/RoleTree'
 
-
 const FormItem = Form.Item;
 const Option = Select.Option;
-
-
 
 @connect(({ addRole, loading }) => ({
     addRole,
@@ -36,10 +33,6 @@ class AddRole extends PureComponent {
         });
     };
 
-
-
-
-
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFields((err, values) => {
@@ -48,7 +41,6 @@ class AddRole extends PureComponent {
             }
         });
     }
-
 
     render() {
         const { addRole, cardsLoading, history } = this.props;

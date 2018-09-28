@@ -8,23 +8,16 @@ import {
     Card,
     Form,
     Input,
-    Select,
-    Icon,
     Button,
-    Dropdown,
-    Menu,
-    InputNumber,
-    DatePicker,
     Modal,
     message,
-    Radio,
     Table,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './Role.less';
 
 const FormItem = Form.Item;
-const { Search, TextArea } = Input;
+const { Search } = Input;
 
 @connect(({ role, loading }) => ({
     role,
@@ -76,10 +69,16 @@ class Role extends PureComponent {
         );
     };
 
-    
-
     render() {
         const {dispatch, role, cardsLoading } = this.props;
+        const paginationProps = {
+            showSizeChanger: true,
+            showQuickJumper: true,
+            defaultCurrent:2,
+            total:100,
+            pageSize:10,
+          };
+
         const roleDelete = (key, currentId) => {
             Modal.confirm({
                 title: '删除角色',
@@ -155,7 +154,12 @@ class Role extends PureComponent {
                             />
                         </div>
                         
-                        <Table dataSource={dataSource} columns={columns} loading={cardsLoading} />
+                        <Table 
+                            dataSource={dataSource}
+                            pagination={paginationProps} 
+                            columns={columns} 
+                            loading={cardsLoading} 
+                        />
                     </div>
                 </Card>
 

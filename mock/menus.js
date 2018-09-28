@@ -16,175 +16,173 @@ const menus = [
         path: '/system/resource',
         name: '资源管理',
       },
+      {
+        path: '/system/adminConfig',
+        name: '后台参数配置',
+      },
+      {
+        path: '/system/adminSwitch',
+        name: '后台按钮开关',
+      },
+      {
+        path: '/system/crmNotice',
+        name: 'CRM更新信息',
+      },
+      {
+        path: '/system/cron',
+        name: '定时任务管理',
+      },
     ],
   },
   {
-    path: '/dashboard',
-    name: 'dashboard',
-    icon: 'dashboard',
+    path: '/base',
+    name: '基础数据',
+    icon: 'bar-chart',
     routes: [
       {
-        path: '/dashboard/analysis',
-        name: 'analysis',
-        authority: ['user'],
+        path: '/base/brand',
+        name: '品牌',
       },
       {
-        path: '/dashboard/monitor',
-        name: 'monitor',
+        path: '/base/cars',
+        name: '车系',
       },
       {
-        path: '/dashboard/workplace',
-        name: 'workplace',
-      },
-      
-    ],
-  },
-  // forms
-  {
-    path: '/form',
-    icon: 'form',
-    name: 'form',
-    routes: [
-      {
-        path: '/form/basic-form',
-        name: 'basicform',
+        path: '/base/carType',
+        name: '车型',
       },
       {
-        path: '/form/step-form',
-        name: 'stepform',
-        hideChildrenInMenu: true,
-        routes: [
-          {
-            path: '/form/step-form',
-            name: 'stepform',
-            redirect: '/form/step-form/info',
-          },
-          {
-            path: '/form/step-form/info',
-            name: 'info',
-
-          },
-          {
-            path: '/form/step-form/confirm',
-            name: 'confirm',
-          },
-          {
-            path: '/form/step-form/result',
-            name: 'result',
-          },
-        ],
-      },
-
-    ],
-  },
-  // list
-  {
-    path: '/list',
-    icon: 'table',
-    name: 'list',
-    routes: [
-      {
-        path: '/list/table-list',
-        name: 'searchtable',
+        path: '/base/profile',
+        name: '自定义档案',
       },
       {
-        path: '/list/basic-list',
-        name: 'basiclist',
+        path: '/base/imageManagement',
+        name: '图片管理',
       },
       {
-        path: '/list/card-list',
-        name: 'cardlist',
+        path: '/base/memberRights',
+        name: '会员权益',
       },
       {
-        path: '/list/search',
-        name: 'searchlist',
-        routes: [
-          {
-            path: '/list/search/articles',
-            name: 'articles',
-          },
-          {
-            path: '/list/search/projects',
-            name: 'projects',
-          },
-          {
-            path: '/list/search/applications',
-            name: 'applications',
-          },
-        ],
+        path: '/base/bankAccount',
+        name: '银行账户管理',
+      },
+      {
+        path: '/base/article',
+        name: '统一文章配置',
+      },
+      {
+        path: '/base/QRCode',
+        name: '二维码管理',
       },
     ],
   },
   {
-    path: '/profile',
-    name: 'profile',
-    icon: 'profile',
-    routes: [
-      // profile
+    path: '/organization',
+    name: '组织管理',
+    icon: 'cluster',
+    routes: [ 
       {
-        path: '/profile/basic',
-        name: 'basic',
+        path: '/organization/headOffice',
+        name: '总部',
       },
-
       {
-        path: '/profile/advanced',
-        name: 'advanced',
+        path: '/organization/group',
+        name: '集团',
       },
-    ],
+      {
+        path: '/organization/area',
+        name: '区域',
+      },
+      {
+        path: '/organization/4sShop',
+        name: '4S店',
+      },
+      {
+        path: '/organization/department',
+        name: '部门',
+      },
+    ]
   },
   {
-    name: 'result',
-    icon: 'check-circle-o',
-    path: '/result',
-    routes: [
-      // result
-      {
-        path: '/result/success',
-        name: 'success',
-      },
-      { path: '/result/fail', name: 'fail', component: './Result/Error' },
-    ],
+    path: '/rule',
+    name: '规则管理',
+    icon: 'file-sync',
+    routes: []
   },
   {
-    name: 'exception',
-    icon: 'warning',
-    path: '/exception',
-    routes: [
-      // exception
-      {
-        path: '/exception/403',
-        name: 'not-permission',
-      },
-      {
-        path: '/exception/404',
-        name: 'not-find',
-      },
-      {
-        path: '/exception/500',
-        name: 'server-error',
-      },
-      {
-        path: '/exception/trigger',
-        name: 'trigger',
-        hideInMenu: true,
-      },
-    ],
-  },
-  {
-    name: 'account',
+    path: '/member',
+    name: '会员管理',
     icon: 'user',
-    path: '/account',
-    routes: [
-      {
-        path: '/account/center',
-        name: 'center',
-      },
-      {
-        path: '/account/settings',
-        name: 'settings',
-      },
-    ],
+    routes: []
   },
+  {
+    path: '/points',
+    name: '积分管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/service',
+    name: '服务管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/business',
+    name: '业务管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/packages ',
+    name: '套餐管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/consume',
+    name: '消费管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/level',
+    name: '等级管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/mission',
+    name: '任务管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/activity',
+    name: '活动管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/app',
+    name: 'App管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/workOrder; ',
+    name: '工单管理',
+    icon: 'appstore',
+    routes: []
+  },
+  {
+    path: '/communicate',
+    name: '沟通管理',
+    icon: 'appstore',
+    routes: []
+  },
+  
   {
     component: '404',
   },

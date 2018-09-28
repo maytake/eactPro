@@ -173,10 +173,10 @@ class BasicLayout extends React.PureComponent {
     const currRouterData = this.matchParamsPath(pathname);
 
     if (!currRouterData) {
-      return 'Ant Design Pro';
+      return '盈众乐橙会员管理平台';
     }
     const message = currRouterData.name;
-    return `${message} - Ant Design Pro`;
+    return `${message} - 盈众乐橙会员管理平台`;
   };
 
   getLayoutStyle = () => {
