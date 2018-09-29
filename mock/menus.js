@@ -34,6 +34,44 @@ const menus = [
       },
     ],
   },
+  // list
+  {
+    path: '/list',
+    icon: 'table',
+    name: 'list',
+    routes: [
+      {
+        path: '/list/table-list',
+        name: 'searchtable',
+      },
+      {
+        path: '/list/basic-list',
+        name: 'basiclist',
+      },
+      {
+        path: '/list/card-list',
+        name: 'cardlist',
+      },
+      {
+        path: '/list/search',
+        name: 'searchlist',
+        routes: [
+          {
+            path: '/list/search/articles',
+            name: 'articles',
+          },
+          {
+            path: '/list/search/projects',
+            name: 'projects',
+          },
+          {
+            path: '/list/search/applications',
+            name: 'applications',
+          },
+        ],
+      },
+    ],
+  },
   {
     path: '/base',
     name: '基础数据',
@@ -119,19 +157,19 @@ const menus = [
   {
     path: '/points',
     name: '积分管理',
-    icon: 'appstore',
+    icon: 'star',
     routes: []
   },
   {
     path: '/service',
     name: '服务管理',
-    icon: 'appstore',
+    icon: 'contacts',
     routes: []
   },
   {
     path: '/business',
     name: '业务管理',
-    icon: 'appstore',
+    icon: 'audit',
     routes: []
   },
   {
@@ -143,19 +181,19 @@ const menus = [
   {
     path: '/consume',
     name: '消费管理',
-    icon: 'appstore',
+    icon: 'dollar',
     routes: []
   },
   {
     path: '/level',
     name: '等级管理',
-    icon: 'appstore',
+    icon: 'crown',
     routes: []
   },
   {
     path: '/mission',
     name: '任务管理',
-    icon: 'appstore',
+    icon: 'solution',
     routes: []
   },
   {
@@ -167,19 +205,19 @@ const menus = [
   {
     path: '/app',
     name: 'App管理',
-    icon: 'appstore',
+    icon: 'mobile',
     routes: []
   },
   {
     path: '/workOrder; ',
     name: '工单管理',
-    icon: 'appstore',
+    icon: 'file-text',
     routes: []
   },
   {
     path: '/communicate',
     name: '沟通管理',
-    icon: 'appstore',
+    icon: 'message',
     routes: []
   },
   

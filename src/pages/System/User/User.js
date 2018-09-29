@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
 import { routerRedux } from 'dva/router';
 import Link from 'umi/link';
@@ -18,15 +18,41 @@ import styles from './User.less';
 
 const FormItem = Form.Item;
 
+const CreateForm = Form.create()(props => {
+    const { modalVisible, form, handleAdd, handleModalVisible } = props;
+    const okHandle = () => {
+        form.validateFields((err, fieldsValue) => {
+            if (err) return;
+            form.resetFields();
+            handleAdd(fieldsValue);
+        });
+    };
+    return (
+        <Modal
+            destroyOnClose
+            title="新建规则"
+            visible={modalVisible}
+            onOk={okHandle}
+            onCancel={() => handleModalVisible()}
+        >
+            <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
+                {form.getFieldDecorator('desc', {
+                    rules: [{ required: true, message: '请输入至少五个字符的规则描述！', min: 5 }],
+                })(<Input placeholder="请输入" />)}
+            </FormItem>
+        </Modal>
+    );
+});
 
 @connect(({ role, loading }) => ({
     role,
     loadings: loading.effects['role/fetchBasic'],
 }))
+
 @Form.create()
 class User extends PureComponent {
     state = {
-
+        modalVisible: false,
     };
 
     componentDidMount() {
@@ -36,48 +62,81 @@ class User extends PureComponent {
         });
     };
 
+    handleModalVisible = flag => {
+        this.setState({
+            modalVisible: !!flag,
+        });
+    };
+
+
+    handleAdd = fields => {
+        message.success(fields.desc);
+        this.handleModalVisible();
+    };
+
     deleteItem(id) {
         message.success('This is a message of success ');
         console.log(id);
     };
 
-    Add(){
+    Add() {
         this.props.dispatch(routerRedux.push({
-            pathname:'/system/role/addrole',
+            pathname: '/system/role/addrole',
         }))
     };
+
 
     renderForm() {
         const {
             form: { getFieldDecorator },
         } = this.props;
+
         return (
             <Form onSubmit={this.handleSearch} layout="inline">
                 <Row>
-                    <Col md={20} sm={16}>
-                        <FormItem label="角色名称">
-                            {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-                        </FormItem>
-                    </Col>
-                    <Col md={4} sm={16}>
+
+                    <FormItem>
+                        {getFieldDecorator('shipname')(<Input placeholder="4s店名称" />)}
+                    </FormItem>
+                    <FormItem>
+                        {getFieldDecorator('account ')(<Input placeholder="账号" />)}
+                    </FormItem>
+                    <FormItem>
+                        {getFieldDecorator('name')(<Input placeholder="姓名" />)}
+                    </FormItem>
+                    <FormItem>
                         <Button type="primary" htmlType="submit">
                             查询
                         </Button>
-                    </Col>
+                    </FormItem>
+
                 </Row>
             </Form>
         );
     };
 
     render() {
-        const {dispatch, cardsLoading } = this.props;
+        const { dispatch, cardsLoading } = this.props;
+
+
+        const { modalVisible } = this.state;
+
+        const parentMethods = {
+            handleAdd: this.handleAdd,
+            handleModalVisible: this.handleModalVisible,
+        };
         const paginationProps = {
             showSizeChanger: true,
             showQuickJumper: true,
-            defaultCurrent:2,
-            total:100,
-            pageSize:10,
-          };
+            defaultCurrent: 2,
+            total: 100,
+            pageSize: 10,
+        };
+
+
+        const SwitchStatus = (key, id) => {
+            message.success(id);
+        };
 
         const Delete = (key, currentId) => {
             Modal.confirm({
@@ -88,55 +147,84 @@ class User extends PureComponent {
                 onOk: () => this.deleteItem(currentId),
             });
         };
-        const Edit=(key, id) => {
-            dispatch(routerRedux.push({
-                pathname:'/system/role/addrole',
-                query:{id}
-            }))
-        };
-        
         const dataSource = [{
-            key: '1',
-            name: '开发人员',
-            code: 1001031,
-            type: '4S店服务顾问',
-            status: '启用',
+            key: '0',
+            account: '112267',
+            name: '温晶晶',
+            time: '2018-08-08 12:06:27',
+            agency: '惠安盈众',
+            role: '销售顾问',
+            phone: '15906013968',
+            email: '	xiaolin.xie@enjoyauto.com	',
+            mall: '商城',
+            status: '已开通',
         }, {
-            key: '2',
-            name: '开发人员',
-            code: 1001031,
-            type: '4S店服务顾问',
-            status: '启用',
-        }];
+            key: '1',
+            account: '112267',
+            name: '温晶晶',
+            time: '2018-08-08 12:06:27',
+            agency: '惠安盈众',
+            role: '销售顾问',
+            phone: '15906013968',
+            email: '	xiaolin.xie@enjoyauto.com	',
+            mall: '商城',
+            status: '已开通',
+        },];
 
 
         const columns = [{
-            title: '角色名称',
+            title: '账号',
+            dataIndex: 'account',
+            key: 'account',
+            fixed: 'left'
+        }, {
+            title: '姓名',
             dataIndex: 'name',
             key: 'name',
         }, {
-            title: '角色编码',
-            dataIndex: 'code',
-            key: 'code',
+            title: '注册时间',
+            dataIndex: 'time',
+            key: 'time',
         }, {
-            title: '角色类型',
-            dataIndex: 'type',
-            key: 'type',
+            title: '所属机构',
+            dataIndex: 'agency',
+            key: 'agency',
         }, {
-            title: '角色状态',
+            title: '角色',
+            dataIndex: 'role',
+            key: 'role',
+        }, {
+            title: '电话',
+            dataIndex: 'phone',
+            key: 'phone',
+        }, {
+            title: '邮箱',
+            dataIndex: 'email',
+            key: 'email',
+        }, {
+            title: '商城',
+            dataIndex: 'mall',
+            key: 'mall',
+        }, {
+            title: '状态',
             dataIndex: 'status',
             key: 'status',
         }, {
             title: '操作',
             dataIndex: 'action',
             key: 'action',
+            fixed: 'right',
+            width: 155,
             render: (text, record) => (
-                <span>
-                    <Button icon="edit" onClick={({ key }) => Edit(key, record.key)} type="primary" style={{marginRight:"8px"}}></Button>
+                <Fragment>
+                    <Button icon="play-circle" onClick={({ key }) => SwitchStatus(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
+                    <Button icon="pause-circle" onClick={({ key }) => SwitchStatus(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
+                    <Button icon="setting" onClick={() => this.handleModalVisible(true)} type="primary" style={{ marginRight: "8px" }}></Button>
                     <Button icon="delete" onClick={({ key }) => Delete(key, record.key)} type="primary"></Button>
-                </span>
+                </Fragment>
             ),
         }];
+
 
         return (
             <PageHeaderWrapper>
@@ -148,18 +236,19 @@ class User extends PureComponent {
                                     新建
                                 </Button>
                             </div>
-                            <div className={styles.searchList}>{this.renderForm()}</div> 
+                            <div className={styles.searchList}>{this.renderForm()}</div>
                         </div>
-                        
-                        <Table 
+
+                        <Table
                             dataSource={dataSource}
-                            pagination={paginationProps} 
-                            columns={columns} 
-                            loading={cardsLoading} 
+                            pagination={paginationProps}
+                            columns={columns}
+                            loading={cardsLoading}
+                            scroll={{ x: '110%' }}
                         />
                     </div>
                 </Card>
-
+                <CreateForm {...parentMethods} modalVisible={modalVisible} />
             </PageHeaderWrapper>
         );
     }

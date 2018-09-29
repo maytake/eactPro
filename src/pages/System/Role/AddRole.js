@@ -119,7 +119,7 @@ class AddRole extends PureComponent {
                             <Button type="primary" htmlType="submit" style={{ marginRight: '10px' }}>
                                 保存
                             </Button>
-                            <Button onClick={() => history.push('/system/role')}>
+                            <Button onClick={() => history.go(-1)}>
                                 返回
                             </Button>
                         </FormItem>

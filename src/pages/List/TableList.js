@@ -609,10 +609,12 @@ class TableList extends PureComponent {
   }
 
   render() {
+    
     const {
       rule: { data },
       loading,
     } = this.props;
+    console.log(data)
     const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
     const menu = (
       <Menu onClick={this.handleMenuClick} selectedKeys={[]}>

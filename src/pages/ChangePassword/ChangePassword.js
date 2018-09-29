@@ -32,7 +32,7 @@ class BasicForms extends PureComponent {
   };
 
   render() {
-    const { submitting } = this.props;
+    const { submitting, history } = this.props;
     const {
       form: { getFieldDecorator, getFieldValue },
     } = this.props;
@@ -59,7 +59,7 @@ class BasicForms extends PureComponent {
     return (
       <PageHeaderWrapper
         title="修改密码"
-        content="表单页用于向用户收集或验证信息，基础表单常见于数据项较少的表单场景。"
+       
       >
         <Card bordered={false}>
           <Form onSubmit={this.handleSubmit} hideRequiredMark style={{ marginTop: 8 }}>
@@ -71,7 +71,7 @@ class BasicForms extends PureComponent {
                     message: '请输入旧密码',
                   },
                 ],
-              })(<Input placeholder="请输入旧密码" />)}
+              })(<Input type="password" placeholder="请输入旧密码" />)}
             </FormItem>
             <FormItem {...formItemLayout} label="新密码">
               {getFieldDecorator('newpassword', {
@@ -81,7 +81,7 @@ class BasicForms extends PureComponent {
                     message: '请输入新密码',
                   },
                 ],
-              })(<Input placeholder="请输入新密码" />)}
+              })(<Input type="password" placeholder="请输入新密码" />)}
             </FormItem>
             <FormItem {...formItemLayout} label="再输入新密码">
               {getFieldDecorator('checkpassword', {
@@ -91,14 +91,14 @@ class BasicForms extends PureComponent {
                     message: '请再输入新密码',
                   },
                 ],
-              })(<Input placeholder="请再输入新密码" />)}
+              })(<Input type="password" placeholder="请再输入新密码" />)}
             </FormItem>
 
             <FormItem {...submitFormLayout} style={{ marginTop: 32 }}>
               <Button type="primary" htmlType="submit" loading={submitting}>
                 提交
               </Button>
-              <Button style={{ marginLeft: 8 }}>返回</Button>
+              <Button style={{ marginLeft: 8 }} onClick={() => history.go(-1)}>返回</Button>
             </FormItem>
           </Form>
         </Card>
