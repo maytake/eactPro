@@ -2,6 +2,7 @@ import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Card } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import AddResource from './AddResource';
 
 
 
@@ -16,6 +17,7 @@ import PageHeaderWrapper from '@/components/PageHeaderWrapper';
         <Card bordered={false}>
           <div>Resource</div>
         </Card>
+        <AddResource />
       </PageHeaderWrapper>
     );
   }

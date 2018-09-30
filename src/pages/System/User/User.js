@@ -12,6 +12,7 @@ import {
     Modal,
     message,
     Table,
+    Tooltip,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './User.less';
@@ -81,7 +82,7 @@ class User extends PureComponent {
 
     Add() {
         this.props.dispatch(routerRedux.push({
-            pathname: '/system/role/addrole',
+            pathname: '/system/user/adduser',
         }))
     };
 
@@ -217,10 +218,18 @@ class User extends PureComponent {
             width: 155,
             render: (text, record) => (
                 <Fragment>
-                    <Button icon="play-circle" onClick={({ key }) => SwitchStatus(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
-                    <Button icon="pause-circle" onClick={({ key }) => SwitchStatus(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
-                    <Button icon="setting" onClick={() => this.handleModalVisible(true)} type="primary" style={{ marginRight: "8px" }}></Button>
-                    <Button icon="delete" onClick={({ key }) => Delete(key, record.key)} type="primary"></Button>
+                    <Tooltip title="开启">
+                        <Button icon="play-circle" onClick={({ key }) => SwitchStatus(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
+                    </Tooltip>
+                    <Tooltip title="停止">
+                        <Button icon="pause-circle" onClick={({ key }) => SwitchStatus(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
+                    </Tooltip>
+                    <Tooltip title="设置">
+                        <Button icon="setting" onClick={() => this.handleModalVisible(true)} type="primary" style={{ marginRight: "8px" }}></Button>
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button icon="delete" onClick={({ key }) => Delete(key, record.key)} type="primary"></Button>
+                    </Tooltip>
                 </Fragment>
             ),
         }];

@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
+import moment from 'moment';
 import { routerRedux } from 'dva/router';
-import Link from 'umi/link';
 import {
     Row,
     Col,
@@ -12,6 +12,7 @@ import {
     Modal,
     message,
     Table,
+    Tooltip,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './Role.less';
@@ -132,8 +133,12 @@ class Role extends PureComponent {
             key: 'action',
             render: (text, record) => (
                 <span>
-                    <Button icon="edit" onClick={({ key }) => roleEdit(key, record.key)} type="primary" style={{marginRight:"8px"}}></Button>
-                    <Button icon="delete" onClick={({ key }) => roleDelete(key, record.key)} type="primary"></Button>
+                    <Tooltip title="编辑">
+                        <Button icon="edit" onClick={({ key }) => roleEdit(key, record.key)} type="primary" style={{marginRight:"8px"}}></Button>
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button icon="delete" onClick={({ key }) => roleDelete(key, record.key)} type="primary"></Button>
+                    </Tooltip>
                 </span>
             ),
         }];

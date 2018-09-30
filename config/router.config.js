@@ -55,6 +55,11 @@ export default [
             name: '添加角色',
             component: './System/Role/AddRole',
           },
+          {
+            path: '/system/user/adduser',
+            name: '添加用户',
+            component: './System/User/AddUser',
+          },
         ],
       },
 

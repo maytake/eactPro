@@ -26,6 +26,13 @@ class AddRole extends PureComponent {
 
     }
 
+    colLayout = {
+        xl:6, 
+        lg:8,
+        sm:24,
+    };
+
+
     componentDidMount() {
         const { dispatch } = this.props;
         dispatch({
@@ -54,7 +61,7 @@ class AddRole extends PureComponent {
                         <div className={styles.roleForm}>
 
                             <Row gutter={24}>
-                                <Col xl={6} lg={8} sm={24}>
+                                <Col {...this.colLayout}>
                                     <FormItem label='角色名称：'>
                                         {getFieldDecorator('roleName', {
                                             rules: [{ required: true, message: '请输入角色名称!' }],
@@ -63,7 +70,7 @@ class AddRole extends PureComponent {
                                         )}
                                     </FormItem>
                                 </Col>
-                                <Col xl={6} lg={8} sm={24}>
+                                <Col {...this.colLayout}>
                                     <FormItem label='角色编码：'>
                                         {getFieldDecorator('roleCode', {
                                             rules: [{ required: true, message: '请输入角色编码!' }],
@@ -72,7 +79,7 @@ class AddRole extends PureComponent {
                                         )}
                                     </FormItem>
                                 </Col>
-                                <Col xl={6} lg={8} sm={24}>
+                                <Col {...this.colLayout}>
                                     <FormItem label='角色状态：'>
                                         {getFieldDecorator('status', {
                                             rules: [{ required: true, message: '请选择角色状态!' }],
@@ -87,7 +94,7 @@ class AddRole extends PureComponent {
                                         )}
                                     </FormItem>
                                 </Col>
-                                <Col xl={6} lg={8} sm={24}>
+                                <Col {...this.colLayout}>
                                     <FormItem label='角色类型：'>
                                         {getFieldDecorator('type', {
                                             rules: [{ required: true, message: '请选择角色类型!' }],
@@ -108,7 +115,7 @@ class AddRole extends PureComponent {
 
 
                         </div>
-                        <h1 className={styles.roleTitle}>权限列表</h1>
+                        <h1 className={styles.roleTitle} style={{ marginBottom: '-1px' }}>权限列表</h1>
                         <div className={styles.roleAuthority}>
                             <div className={styles.roleBorder}>
                                 <RoleTree />            
