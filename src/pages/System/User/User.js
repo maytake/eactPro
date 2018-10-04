@@ -97,7 +97,7 @@ class User extends PureComponent {
   }
 
   render() {
-    const { cardsLoading } = this.props;
+    const { dispatch, cardsLoading } = this.props;
 
     const { modalVisible } = this.state;
 
@@ -113,7 +113,7 @@ class User extends PureComponent {
       pageSize: 10,
     };
 
-    const SwitchStatus = (key, status) => {
+    const SwitchStatus = (key, status, id) => {
       message.success(status);
     };
 
