@@ -93,4 +93,16 @@ export default {
   cssnano: {
     mergeRules: false,
   },
+  proxy: {
+/*     "/api": {
+      "target": "http://192.168.11.81/",
+      "changeOrigin": true,
+      "pathRewrite": { "^/api" : "" }
+    }, */
+    '/couponSys':{
+      target: "https://ceshi.lechengclub.com",
+      changeOrigin: true,
+    },
+
+  }
 };

@@ -1,5 +1,5 @@
 
-import { queryHomeDec } from '@/services/api';
+import { queryTest } from '@/services/api';
 
 export default {
   namespace: 'resource',
@@ -9,8 +9,8 @@ export default {
   },
 
   effects: {
-    *fetchBasic(_, { call, put }) {
-      const response = yield call(queryHomeDec);
+    *fetchBasic({ payload }, { call, put }) {
+      const response = yield call(queryTest, payload);
       yield put({
         type: 'show',
         payload: response

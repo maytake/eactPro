@@ -9,7 +9,7 @@ import styles from './User.less';
 const FormItem = Form.Item;
 
 const CreateForm = Form.create()(props => {
-  const { modalVisible, form, handleAdd, handleModalVisible } = props;
+  const { modalVisible, form, handleAdd, handleModalVisible,} = props;
   const okHandle = () => {
     form.validateFields((err, fieldsValue) => {
       if (err) return;
@@ -17,6 +17,26 @@ const CreateForm = Form.create()(props => {
       handleAdd(fieldsValue);
     });
   };
+
+  const checkConfirm = (rule, value, callback) => {
+    if (value && value !== form.getFieldValue('password')) {
+      callback('两次输入的密码不匹配!');
+    } else {
+      callback();
+    }
+  };
+
+  const checkPassword = (rule, value, callback) => {
+    if (!value) {
+      callback('请输入密码！');
+    } else if (value.length < 6) {
+        callback('密码有误！');
+      } else {
+        callback();
+      }
+  };
+
+
   return (
     <Modal
       destroyOnClose
@@ -25,10 +45,23 @@ const CreateForm = Form.create()(props => {
       onOk={okHandle}
       onCancel={() => handleModalVisible()}
     >
-      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="描述">
-        {form.getFieldDecorator('desc', {
-          rules: [{ required: true, message: '请输入至少五个字符的规则描述！', min: 5 }],
-        })(<Input placeholder="请输入" />)}
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="密码">
+        {form.getFieldDecorator('password', {
+          rules: [{
+            validator: checkPassword,
+          },],
+        })(<Input type="password" placeholder="至少6位密码，区分大小写" />)}
+      </FormItem>
+      <FormItem labelCol={{ span: 5 }} wrapperCol={{ span: 15 }} label="确认密码">
+        {form.getFieldDecorator('confirm', {
+          rules: [{
+            required: true,
+            message: '请确认密码！',
+          },
+          {
+            validator: checkConfirm,
+          },],
+        })(<Input type="password" placeholder="请再次输入密码" />)}
       </FormItem>
     </Modal>
   );
