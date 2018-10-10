@@ -1,6 +1,5 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import moment from 'moment';
 import {
   Input,
   Modal,
@@ -8,9 +7,8 @@ import {
   Select,
   Row,
   Col,
-  Table,
-  Button,
 } from 'antd';
+import TableForm from './TableForm';
 import styles from './AddResource.less';
 
 const FormItem = Form.Item;
@@ -19,9 +17,7 @@ const SelectOption = Select.Option;
 @Form.create()
 class AddResource extends PureComponent {
 
-  state = {
-    data:[]
-  }
+  state = {}
 
   formLayout = {
     labelCol: { className: 'labelName' },
@@ -39,7 +35,6 @@ class AddResource extends PureComponent {
   };
 
 
-
   render() {
     const {
       form: { getFieldDecorator },
@@ -49,6 +44,7 @@ class AddResource extends PureComponent {
     const { modalVisible, form, handleAdd, handleModalVisible } = this.props;
     const okHandle = () => {
       form.validateFields((err, fieldsValue) => {
+        console.log(fieldsValue);
         if (err) return;
         form.resetFields();
         handleAdd(fieldsValue);
@@ -79,53 +75,18 @@ class AddResource extends PureComponent {
       "code": "03"
     },]
 
-    // 表格内容
-    const {data} = this.state;
-    const columns = [{
-      title: '按钮名称',
-      dataIndex: 'name',
-      key: 'name',
-      render: (text, record) => (
-        <Input placeholder="Basic usage" />
-      ),
-    }, {
-      title: '按钮权限字符串 ',
-      dataIndex: 'permission ',
-      key: 'permission ',
-      render: (text, record) => (
-        <Input placeholder="Basic usage" />
-      ),
-    }, {
-      title: '操作',
-      key: 'action',
-      width: '65px',
-      render: (text, record) => (
-        <Button icon="delete" onClick={({ key }) => permissionDelete(key, record.key)} type="primary"></Button>
-      ),
-    }];
-
-   
-    const permissionDelete = (key, id) => {
-      data.splice(id, 1);
-      this.setState((prevState)=>({ data: prevState.data }));
-    }
-
-    const permissionAdd = () => {
-      
-      const item = { 
-        key:Math.random().toFixed(5),
-        name:'',
-        permission:''
-      }; 
-      data.push(item);
-      this.setState((prevState,props)=>{
-        console.log(prevState) 
-        return {data: prevState.data} 
-      });
-    }
-
-    // 表格内容end
-    
+    const tableData = [
+      {
+        key: '1',
+        name: 'John Brown',
+        permission: 'New York No. 1 Lake Park',
+      },
+      {
+        key: '2',
+        name: 'Jim Green',
+        permission: 'London No. 1 Lake Park',
+      },
+    ];
 
     const getModalContent = () => {
       return (
@@ -200,13 +161,9 @@ class AddResource extends PureComponent {
           </Row>
           <Row gutter={24}>
             <FormItem label="按钮明细" {...this.tableLayout}>
-              <Table
-                bordered
-                columns={columns}
-                dataSource={data}
-                pagination={false}
-              />
-              <Button style={{ marginTop: '15px' }} icon="plus" onClick={() => permissionAdd()}>新增</Button>
+                {getFieldDecorator('members', {
+                initialValue: tableData,
+              })(<TableForm />)}
             </FormItem>
           </Row>
         </Form>

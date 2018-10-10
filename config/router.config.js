@@ -72,7 +72,7 @@ export default [
             path: '/dashboard/analysis',
             name: 'analysis',
             component: './Dashboard/Analysis',
-            authority: ['user'],
+            authority: ['user','admin'],
           },
           {
             path: '/dashboard/monitor',
@@ -128,7 +128,7 @@ export default [
           {
             path: '/form/advanced-form',
             name: 'advancedform',
-            authority: ['admin'],
+            authority: ['admin','user'],
             component: './Forms/AdvancedForm',
           },
         ],
