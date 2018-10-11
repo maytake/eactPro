@@ -7,8 +7,10 @@ import {
   Select,
   Row,
   Col,
+  Popconfirm,
+  Button,
 } from 'antd';
-import TableForm from './TableForm';
+import TableForm from './TableForm2';
 import styles from './AddResource.less';
 
 const FormItem = Form.Item;
@@ -16,8 +18,6 @@ const SelectOption = Select.Option;
 
 @Form.create()
 class AddResource extends PureComponent {
-
-  state = {}
 
   formLayout = {
     labelCol: { className: 'labelName' },
@@ -34,6 +34,17 @@ class AddResource extends PureComponent {
     sm: 24,
   };
 
+  constructor(props) {
+    super(props);
+    this.state = { };
+    this.setTableForm = null;
+
+    this.setTableFormRef = element => {
+      this.setTableForm = element;
+    };
+  }
+
+  
 
   render() {
     const {
@@ -45,7 +56,7 @@ class AddResource extends PureComponent {
     const okHandle = () => {
       form.validateFields((err, fieldsValue) => {
         console.log(fieldsValue);
-        // if (err) return;
+        if (err) return;
         form.resetFields();
         handleAdd(fieldsValue);
       });
@@ -78,17 +89,65 @@ class AddResource extends PureComponent {
     const tableData = [
       {
         key: '1',
-        type:'lucy',
         name: 'John Brown',
         permission: 'New York No. 1 Lake Park',
       },
       {
         key: '2',
-        type:'jack',
         name: 'Jim Green',
         permission: 'London No. 1 Lake Park',
       },
     ];
+
+    const itemlist = {
+        key: 0,
+        name: '',
+        permission: ''
+    };
+
+
+    const handleFieldChange = (e, fieldName, key)=>{
+      this.setTableForm.handleFieldChange(e, fieldName, key);
+    }
+
+    const permissionDelete = (key)=>{
+      this.setTableForm.permissionDelete(key);
+    }
+
+    const columns = [{
+      title: '按钮名称',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text, record) => (
+          <Input 
+          value={text}
+          onChange={e => handleFieldChange(e, 'name', record.key)}
+          placeholder="请输入按钮名称" 
+          />
+      ),
+  }, {
+      title: '按钮权限字符串 ',
+      dataIndex: 'permission',
+      key: 'permission',
+      render: (text, record) => (
+          <Input 
+          value={text}
+          onChange={e => handleFieldChange(e, 'permission', record.key)}
+          placeholder="请输入按钮权限字符串"
+          />
+      ),
+  }, {
+      title: '操作',
+      key: 'action',
+      width: '65px',
+      render: (text, record) => (
+          <Popconfirm title="是否要删除此行？" onConfirm={() => permissionDelete(record.key)}>
+              <Button icon="delete" type="primary"></Button>
+          </Popconfirm>
+      ),
+  }];
+
+
 
     const getModalContent = () => {
       return (
@@ -165,7 +224,11 @@ class AddResource extends PureComponent {
             <FormItem label="按钮明细" {...this.tableLayout}>
                 {getFieldDecorator('members', {
                 initialValue: tableData,
-              })(<TableForm />)}
+              })(<TableForm 
+                ref={this.setTableFormRef} 
+                columns={columns} 
+                itemlist={itemlist} 
+              />)}
             </FormItem>
           </Row>
         </Form>
@@ -174,7 +237,7 @@ class AddResource extends PureComponent {
 
     return (
       <Modal
-        title="新增资源"
+        title="新增用户"
         className={styles.standardListForm}
         width={960}
         bodyStyle={{ padding: '28px 20px 0' }}

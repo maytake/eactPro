@@ -1,29 +1,36 @@
 
-import { queryTest } from '@/services/api';
+import { Resource, addResource } from '@/services/getApi';
 
 export default {
   namespace: 'resource',
 
   state: {
-    data: []
+    dataSource: []
   },
 
   effects: {
-    *fetchBasic({ payload }, { call, put }) {
-      const response = yield call(queryTest, payload);
+    *fetchResource({ payload }, { call, put }) {
+      const response = yield call(Resource, payload);
       yield put({
-        type: 'show',
+        type: 'queryList',
         payload: response
       });
     },
-
+    *add({ payload, callback }, { call, put }) {
+      const response = yield call(addResource, payload);
+      yield put({
+        type: 'queryList',
+        payload: response,
+      });
+      if (callback) callback();
+    },
   },
 
   reducers: {
-    show(state, {payload}) {
+    queryList(state, {payload}) {
       return {
         ...state,
-        data:payload
+        dataSource:payload
       };
     },
   },

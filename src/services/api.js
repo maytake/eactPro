@@ -136,9 +136,6 @@ export async function queryRoutes() {
   return request('/api/menus');
 }
 
-
-
-
 export async function queryTest(params) {
   return request('/couponSys/login/login.json',{
     method: 'POST',

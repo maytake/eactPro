@@ -23,25 +23,28 @@ const { Search } = Input;
 
 @connect(({ resource, loading }) => ({
     resource,
-    loadings: loading.effects['resource/fetchBasic'],
+    loading: loading.models.resource,
 }))
 @Form.create()
 class Resource extends PureComponent {
-    state = {
-      modalVisible: false,
-    };
+    constructor(props){
+        super(props);
+        this.handleSearch=this.handleSearch.bind(this);
+        this.state = {
+            modalVisible: false,
+        };
+    }
+
 
     componentDidMount() {
         const { dispatch } = this.props;
         dispatch({
-            type: 'resource/fetchBasic',
-            payload: {
-                password:"admin",
-                username:"admin"
-              },
+            type: 'resource/fetchResource',
         });
     };
-    
+
+
+
     handleModalVisible = flag => {
       this.setState({
         modalVisible: !!flag,
@@ -49,9 +52,25 @@ class Resource extends PureComponent {
     };
 
     handleAdd = fields => {
-      message.success(fields.title);
-      this.handleModalVisible();
+        const { dispatch,resource:{dataSource}  } = this.props;
+        dispatch({
+          type: 'resource/add',
+          payload: {
+            desc: fields,
+          },
+        });
+    
+        message.success(dataSource.msg);
+        this.handleModalVisible();
     };
+
+    handleSearch(v){
+        const { dispatch } = this.props;
+        dispatch({
+            type: 'resource/fetchResource',
+            payload: {name:v},
+        });
+    }
 
     deleteItem(id) {
         message.success('This is a message of success ');
@@ -85,7 +104,7 @@ class Resource extends PureComponent {
     };
 
     render() {
-        const {dispatch, role, cardsLoading } = this.props;
+        const { loading, resource:{dataSource} } = this.props;
         const parentMethods = {
           handleAdd: this.handleAdd,
           handleModalVisible: this.handleModalVisible,
@@ -111,21 +130,6 @@ class Resource extends PureComponent {
           this.handleModalVisible(true);
         };
         
-        const dataSource = [{
-            key: '1',
-            name: '分享达人',
-            url: '/yzqc/mbe_communication/wechat_template/mbe_wechat_template_list',
-            string: 'wechatPushConfig:*',
-            visibleRange:'仅集团可见'
-       
-        },{
-          key: '2',
-          name: '分享达人',
-          url: '/yzqc/mbe_communication/wechat_template/mbe_wechat_template_list',
-          string: 'wechatPushConfig:*',
-          visibleRange:'仅集团可见'
-     
-        }];
 
 
         const columns = [{
@@ -172,15 +176,16 @@ class Resource extends PureComponent {
                                 className={styles.search}
                                 placeholder="请输入角色名称"
                                 enterButton="搜索"
-                                onSearch={value => console.log(value)}
+                                onSearch={this.handleSearch}
                             />
                         </div>
                         
                         <Table 
+                            loading={loading}
                             dataSource={dataSource}
                             pagination={paginationProps} 
                             columns={columns} 
-                            loading={cardsLoading} 
+                            
                         />
                     </div>
                 </Card>
