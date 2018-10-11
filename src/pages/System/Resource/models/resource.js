@@ -1,11 +1,12 @@
-
-import { Resource, addResource } from '@/services/getApi';
+import { Resource, AddResource, RemoveResource } from '@/services/getApi';
 
 export default {
   namespace: 'resource',
 
   state: {
-    dataSource: []
+    dataSource: [],
+    addResult: {},
+    reomveResult: {},
   },
 
   effects: {
@@ -13,13 +14,21 @@ export default {
       const response = yield call(Resource, payload);
       yield put({
         type: 'queryList',
-        payload: response
+        payload: response,
       });
     },
     *add({ payload, callback }, { call, put }) {
-      const response = yield call(addResource, payload);
+      const response = yield call(AddResource, payload);
       yield put({
-        type: 'queryList',
+        type: 'addList',
+        payload: response,
+      });
+      if (callback) callback();
+    },
+    *remove({ payload, callback }, { call, put }) {
+      const response = yield call(RemoveResource, payload);
+      yield put({
+        type: 'removeList',
         payload: response,
       });
       if (callback) callback();
@@ -27,10 +36,22 @@ export default {
   },
 
   reducers: {
-    queryList(state, {payload}) {
+    queryList(state, { payload }) {
       return {
         ...state,
-        dataSource:payload
+        dataSource: payload,
+      };
+    },
+    addList(state, { payload }) {
+      return {
+        ...state,
+        addResult: payload,
+      };
+    },
+    removeList(state, { payload }) {
+      return {
+        ...state,
+        reomveResult: payload,
       };
     },
   },

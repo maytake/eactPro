@@ -1,13 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import {
-  Input,
-  Modal,
-  Form,
-  Select,
-  Row,
-  Col,
-} from 'antd';
+import { Input, Modal, Form, Select, Row, Col } from 'antd';
 import TableForm from './TableForm';
 import styles from './AddResource.less';
 
@@ -16,8 +9,7 @@ const SelectOption = Select.Option;
 
 @Form.create()
 class AddResource extends PureComponent {
-
-  state = {}
+  state = {};
 
   formLayout = {
     labelCol: { className: 'labelName' },
@@ -27,13 +19,12 @@ class AddResource extends PureComponent {
   tableLayout = {
     labelCol: { className: 'labelName' },
     wrapperCol: { span: 20 },
-  }
+  };
 
   colLayout = {
     lg: 12,
     sm: 24,
   };
-
 
   render() {
     const {
@@ -45,46 +36,47 @@ class AddResource extends PureComponent {
     const okHandle = () => {
       form.validateFields((err, fieldsValue) => {
         console.log(fieldsValue);
-        // if (err) return;
+        if (err) return;
         form.resetFields();
         handleAdd(fieldsValue);
       });
     };
-    
+
     // 可见范围
     const scopeList = [
       {
-      "pkParentfunc": 150,
-      "dr": 1,
-      "parentfuncname": "系统管理",
-      "ts": "2015-10-9 20:00:27 ",
-      "code": "01"
-    },
-    {
-      "pkParentfunc": 151,
-      "dr": 1,
-      "parentfuncname": "基础数据",
-      "ts": "2015-10-9 20:00:35 ",
-      "code": "02"
-    },
-    {
-      "pkParentfunc": 152,
-      "dr": 1,
-      "parentfuncname": "组织管理",
-      "ts": "2015-10-9 20:00:46 ",
-      "code": "03"
-    },]
+        pkParentfunc: 150,
+        dr: 1,
+        parentfuncname: '系统管理',
+        ts: '2015-10-9 20:00:27 ',
+        code: '01',
+      },
+      {
+        pkParentfunc: 151,
+        dr: 1,
+        parentfuncname: '基础数据',
+        ts: '2015-10-9 20:00:35 ',
+        code: '02',
+      },
+      {
+        pkParentfunc: 152,
+        dr: 1,
+        parentfuncname: '组织管理',
+        ts: '2015-10-9 20:00:46 ',
+        code: '03',
+      },
+    ];
 
     const tableData = [
       {
         key: '1',
-        type:'lucy',
+        type: 'lucy',
         name: 'John Brown',
         permission: 'New York No. 1 Lake Park',
       },
       {
         key: '2',
-        type:'jack',
+        type: 'jack',
         name: 'Jim Green',
         permission: 'London No. 1 Lake Park',
       },
@@ -117,15 +109,20 @@ class AddResource extends PureComponent {
                   rules: [{ required: true, message: '请选择类别' }],
                   initialValue: current.category,
                 })(
-                  <Select 
+                  <Select
                     showSearch
                     optionFilterProp="children"
-                    filterOption={(input, option) => option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                    filterOption={(input, option) =>
+                      option.props.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+                    }
                     placeholder="请选择类别"
                   >
-                    {scopeList.map( item =>  <SelectOption key={item.pkParentfunc} value={item.pkParentfunc}>{item.parentfuncname}</SelectOption>  )}
+                    {scopeList.map(item => (
+                      <SelectOption key={item.pkParentfunc} value={item.pkParentfunc}>
+                        {item.parentfuncname}
+                      </SelectOption>
+                    ))}
                   </Select>
-                 
                 )}
               </FormItem>
             </Col>
@@ -163,7 +160,7 @@ class AddResource extends PureComponent {
           </Row>
           <Row gutter={24}>
             <FormItem label="按钮明细" {...this.tableLayout}>
-                {getFieldDecorator('members', {
+              {getFieldDecorator('members', {
                 initialValue: tableData,
               })(<TableForm />)}
             </FormItem>
