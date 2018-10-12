@@ -131,6 +131,7 @@ class Role extends PureComponent {
             title: '操作',
             dataIndex: 'action',
             key: 'action',
+            width:'155px',
             render: (text, record) => (
                 <span>
                     <Tooltip title="编辑">

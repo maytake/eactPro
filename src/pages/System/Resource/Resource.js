@@ -85,27 +85,7 @@ class Resource extends PureComponent {
     this.handleModalVisible(true);
   }
 
-  renderForm() {
-    const {
-      form: { getFieldDecorator },
-    } = this.props;
-    return (
-      <Form onSubmit={this.handleSearch} layout="inline">
-        <Row>
-          <Col md={4} sm={16}>
-            <FormItem label="角色名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
-            </FormItem>
-          </Col>
-          <Col md={2} sm={16}>
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-          </Col>
-        </Row>
-      </Form>
-    );
-  }
+
 
   render() {
     const {
@@ -162,6 +142,7 @@ class Resource extends PureComponent {
         title: '操作',
         dataIndex: 'action',
         key: 'action',
+        width:'155px',
         render: (text, record) => (
           <span>
             <Tooltip title="编辑">

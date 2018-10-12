@@ -60,6 +60,27 @@ export default [
             name: '添加用户',
             component: './System/User/AddUser',
           },
+          {
+            path: '/system/adminConfig',
+            name: '后台参数配置',
+            component: './System/AdminConfig/AdminConfig',
+          },
+          {
+            path: '/system/adminSwitch',
+            name: '后台按钮开关',
+            component: './System/AdminSwitch/AdminSwitch',
+          },
+          {
+            path: '/system/crmNotice',
+            name: 'CRM更新信息',
+            component: './System/CrmNotice/CrmNotice',
+          },
+          {
+            path: '/system/cron',
+            name: '定时任务管理',
+            component: './System/Cron/Cron',
+          },
+
         ],
       },
 

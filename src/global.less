@@ -67,3 +67,26 @@ ol {
   background-color: #999;
   border-radius: 6px;
 }
+
+:global {
+  .ant-card-body{
+    .tableListOperator {
+      display: flex;
+      margin-bottom: 16px;
+      .newBtn{
+        margin-top: 4px;
+        flex: 1 1 auto;
+        & > button{
+          margin-right: 8px;
+        }
+
+      }
+      .searchList{
+        float: right;
+        text-align: right;
+        margin-left: auto;
+      }
+    }
+  }
+
+}

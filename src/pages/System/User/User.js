@@ -121,7 +121,7 @@ class User extends PureComponent {
           <FormItem>{getFieldDecorator('name')(<Input placeholder="姓名" />)}</FormItem>
           <FormItem>
             <Button type="primary" htmlType="submit">
-              查询
+              搜索
             </Button>
           </FormItem>
         </Row>
