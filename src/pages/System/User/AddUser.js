@@ -11,8 +11,10 @@ import {
     Upload,
     Icon,
     DatePicker,
+    message,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import SearchModel from './SearchModel';
 import styles from './AddUser.less';
 
 
@@ -24,13 +26,25 @@ const Search = Input.Search;
 @Form.create()
 class AddUser extends PureComponent {
     state = {
-
-    }
+        modalVisible: false,
+    };
 
     colLayout = {
         xl: 8,
         md: 12,
         sm: 24,
+    };
+
+
+    handleModalVisible = flag => {
+        this.setState({
+            modalVisible: !!flag,
+        });
+    };
+
+    handleAdd = fields => {
+        message.success(fields);
+        this.handleModalVisible();
     };
 
     normFile = (e) => {
@@ -50,8 +64,18 @@ class AddUser extends PureComponent {
         });
     }
 
+    showChoice(value) {
+        this.handleModalVisible(true);
+    }
+
     render() {
+        const { modalVisible } = this.state;
         const { history } = this.props;
+        const parentMethods = {
+            handleAdd: this.handleAdd,
+            handleModalVisible: this.handleModalVisible,
+        };
+
         const { getFieldDecorator } = this.props.form;
         const formItemLayout = {
             labelCol: {
@@ -159,7 +183,7 @@ class AddUser extends PureComponent {
                                                 })(
                                                     <Search
                                                         placeholder="input search text"
-                                                        onSearch={value => console.log(value)}
+                                                        onSearch={value => this.showChoice(value)}
                                                         enterButton
                                                     />
                                                 )}
@@ -172,7 +196,7 @@ class AddUser extends PureComponent {
                                                 })(
                                                     <Search
                                                         placeholder="input search text"
-                                                        onSearch={value => console.log(value)}
+                                                        onSearch={value => this.showChoice(value)}
                                                         enterButton
                                                     />
                                                 )}
@@ -185,7 +209,7 @@ class AddUser extends PureComponent {
                                                 })(
                                                     <Search
                                                         placeholder="input search text"
-                                                        onSearch={value => console.log(value)}
+                                                        onSearch={value => this.showChoice(value)}
                                                         enterButton
                                                     />
                                                 )}
@@ -274,6 +298,8 @@ class AddUser extends PureComponent {
 
                     </Form>
                 </Card>
+                <SearchModel modalVisible={modalVisible} {...parentMethods} />
+
 
             </PageHeaderWrapper>
         );

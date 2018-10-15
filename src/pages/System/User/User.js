@@ -174,7 +174,7 @@ class User extends PureComponent {
       },
       {
         key: '1',
-        account: '112267',
+        account: '212267',
         name: '温晶晶',
         time: '2018-08-08 12:06:27',
         agency: '惠安盈众',
@@ -192,6 +192,7 @@ class User extends PureComponent {
         dataIndex: 'account',
         key: 'account',
         fixed: 'left',
+        
       },
       {
         title: '姓名',
