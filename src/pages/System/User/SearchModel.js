@@ -6,11 +6,13 @@ const FormItem = Form.Item;
 
 @Form.create()
 class SearchModel extends PureComponent {
-  state={}
+  state={
+    selectedRows:[]
+  }
 
   render(){
 
-    const { modalVisible, handleAdd, handleModalVisible,form: { getFieldDecorator }} = this.props;
+    const { modalVisible, handleAdd, handleModalVisible, form: { getFieldDecorator }} = this.props;
     
     const paginationProps = {
       showSizeChanger: true,
@@ -57,12 +59,17 @@ class SearchModel extends PureComponent {
     }];
     
     const okHandle = () => {
-      handleAdd();
+      const {selectedRows} = this.state;
+      // console.log(selectedRows);
+      handleAdd(selectedRows);
     }
 
     const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        this.setState({
+          selectedRows
+        })
       }
     };
 

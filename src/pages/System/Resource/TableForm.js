@@ -70,7 +70,7 @@ class TableForm extends PureComponent {
         const { onChange } = this.props;
         const newData = data.filter(item => item.key !== key);
         this.setState({ data: newData });
-        // 表单的数据存储到上层组件或者 Redux、dva 中
+        // FormItem的onChange方法，表单的数据存储到上层组件或者 Redux、dva 中
         onChange(newData);
     }
 

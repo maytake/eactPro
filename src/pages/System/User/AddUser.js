@@ -13,6 +13,7 @@ import {
     DatePicker,
     message,
 } from 'antd';
+import isEqual from 'lodash/isEqual';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import SearchModel from './SearchModel';
 import styles from './AddUser.less';
@@ -25,9 +26,6 @@ const Search = Input.Search;
 
 @Form.create()
 class AddUser extends PureComponent {
-    state = {
-        modalVisible: false,
-    };
 
     colLayout = {
         xl: 8,
@@ -35,6 +33,26 @@ class AddUser extends PureComponent {
         sm: 24,
     };
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            modalVisible: false,
+            current:{},
+            value:{},
+        };
+    }
+
+    static getDerivedStateFromProps(nextProps, preState) {
+        if (isEqual(nextProps.current, preState.current)) {
+          console.log(nextProps.current);
+          console.log(preState.value);
+          return null;
+        }
+        return {
+          current: preState.current,
+            value: nextProps.current
+        };
+      }
 
     handleModalVisible = flag => {
         this.setState({
@@ -43,7 +61,13 @@ class AddUser extends PureComponent {
     };
 
     handleAdd = fields => {
-        message.success(fields);
+        message.success("选择成功！");
+        const choiceValue= fields.map(item=>item.name).join(',');
+        this.setState({
+            current:{
+                shop:choiceValue
+            }
+        });
         this.handleModalVisible();
     };
 
@@ -69,7 +93,7 @@ class AddUser extends PureComponent {
     }
 
     render() {
-        const { modalVisible } = this.state;
+        const { modalVisible, current } = this.state;
         const { history } = this.props;
         const parentMethods = {
             handleAdd: this.handleAdd,
@@ -206,6 +230,7 @@ class AddUser extends PureComponent {
                                             <FormItem {...formItemLayout} label='4S店'>
                                                 {getFieldDecorator('4Sship', {
                                                     rules: [{ required: true, message: '请选择4Sship!' }],
+                                                    initialValue: current.shop
                                                 })(
                                                     <Search
                                                         placeholder="input search text"

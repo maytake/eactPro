@@ -2,7 +2,7 @@
 import { queryHomeDec } from '@/services/api';
 
 export default {
-  namespace: 'cron',
+  namespace: 'test',
 
   state: {
     Introduction: []
