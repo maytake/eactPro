@@ -8,9 +8,11 @@ const FormItem = Form.Item;
 class SearchModel extends PureComponent {
   state = {
     selectedRows: [],
+    selectedRowKeys: [],
   };
 
   render() {
+    const { selectedRowKeys } = this.state;
     const {
       columns,
       data,
@@ -30,17 +32,19 @@ class SearchModel extends PureComponent {
 
     const okHandle = () => {
       const { selectedRows } = this.state;
-      // console.log(selectedRows);
       handleAdd(selectedRows);
     };
 
     const rowSelection = {
-      onChange: (selectedRowKeys, selectedRows) => {
+      selectedRowKeys,
+      onChange: (_selectedRowKeys, selectedRows) => {
         // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
         this.setState({
+          selectedRowKeys:_selectedRowKeys,
           selectedRows,
         });
       },
+     
     };
 
     return (

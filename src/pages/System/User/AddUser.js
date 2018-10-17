@@ -34,7 +34,12 @@ class AddUser extends PureComponent {
     super(props);
     this.state = {
       modalVisible: false,
-      current: {},
+      current: {
+        headOffice:'',
+        account:'',
+        shop:''
+      },
+
     };
   }
 
@@ -47,10 +52,8 @@ class AddUser extends PureComponent {
   handleAdd = fields => {
     message.success('选择成功！');
     const choiceValue = fields.map(item => item.name).join(',');
-    this.setState({
-      current: {
+    this.props.form.setFieldsValue({
         shop: choiceValue,
-      },
     });
     this.handleModalVisible();
   };
@@ -73,6 +76,7 @@ class AddUser extends PureComponent {
   };
 
   showChoice(value) {
+    console.log(value);
     this.handleModalVisible(true);
   }
 
@@ -94,7 +98,7 @@ class AddUser extends PureComponent {
         title: '名称',
         dataIndex: 'name',
         sorter: (a, b) => {
-          console.log(a.name.localeCompare(b.name, 'zh-CN'));
+          // console.log(a.name.localeCompare(b.name, 'zh-CN'));
           return a.name.localeCompare(b.name, 'zh-CN');
         },
       },
@@ -188,14 +192,15 @@ class AddUser extends PureComponent {
                       <FormItem {...formItemLayout} label="账号">
                         {getFieldDecorator('account', {
                           rules: [{ required: true, message: '请输入账号!' }],
+                          initialValue: current.account,
                         })(<Input placeholder="请输入账号" />)}
                       </FormItem>
                     </Col>
                     <Col {...this.colLayout}>
                       <FormItem {...formItemLayout} label="姓名">
                         {getFieldDecorator('name', {
-                          rules: [{ required: true, message: '请输入账号!' }],
-                        })(<Input placeholder="请输入账号" />)}
+                          rules: [{ required: true, message: '请输入姓名!' }],
+                        })(<Input placeholder="请输入姓名" />)}
                       </FormItem>
                     </Col>
                     <Col {...this.colLayout}>
@@ -216,6 +221,7 @@ class AddUser extends PureComponent {
                       <FormItem {...formItemLayout} label="总部">
                         {getFieldDecorator('headOffice', {
                           rules: [{ required: true, message: '请选择总部!' }],
+                          initialValue: current.headOffice,
                         })(
                           <Search
                             placeholder="input search text"
@@ -240,8 +246,8 @@ class AddUser extends PureComponent {
                     </Col>
                     <Col {...this.colLayout}>
                       <FormItem {...formItemLayout} label="4S店">
-                        {getFieldDecorator('4Sship', {
-                          rules: [{ required: true, message: '请选择4Sship!' }],
+                        {getFieldDecorator('shop', {
+                          rules: [{ required: true, message: '请选择4Sshop!' }],
                           initialValue: current.shop,
                         })(
                           <Search
