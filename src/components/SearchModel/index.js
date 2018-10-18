@@ -1,21 +1,25 @@
 import React, { PureComponent } from 'react';
 import { Table, Modal, Input, Form, Button, Row } from 'antd';
 
-import styles from './SearchModel.less';
 const FormItem = Form.Item;
 
 @Form.create()
 class SearchModel extends PureComponent {
-  state = {
-    selectedRows: [],
-    selectedRowKeys: [],
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      selectedRows: [],
+      selectedRowKeys: props.selectedKeys,
+    };
+  }
+
 
   render() {
-    const { selectedRowKeys } = this.state;
+    const { selectedRowKeys, selectedRows } = this.state;
+    const {modelKey} = this.props;
     const {
       columns,
-      data,
+      tableData,
       modalVisible,
       handleAdd,
       handleModalVisible,
@@ -31,17 +35,15 @@ class SearchModel extends PureComponent {
     };
 
     const okHandle = () => {
-      const { selectedRows } = this.state;
-      handleAdd(selectedRows);
+      handleAdd({selectedRows,modelKey});
     };
 
     const rowSelection = {
       selectedRowKeys,
-      onChange: (_selectedRowKeys, selectedRows) => {
-        // console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+      onChange: (_selectedRowKeys, _selectedRows) => {
         this.setState({
           selectedRowKeys:_selectedRowKeys,
-          selectedRows,
+          selectedRows:_selectedRows,
         });
       },
      
@@ -50,7 +52,6 @@ class SearchModel extends PureComponent {
     return (
       <Modal
         title="新增资源"
-        className={styles.standardListForm}
         width={960}
         bodyStyle={{ padding: '28px 20px 0' }}
         destroyOnClose
@@ -73,7 +74,7 @@ class SearchModel extends PureComponent {
         <Table
           rowSelection={rowSelection}
           columns={columns}
-          dataSource={data}
+          dataSource={tableData}
           pagination={paginationProps}
           size="small"
         />

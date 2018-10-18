@@ -43,6 +43,8 @@ module.exports = {
     "prefer-destructuring":0,
     "consistent-return":0,
     "no-plusplus":0,
+    "one-var":0,
+    "react/no-unused-state":0,
   },
   settings: {
     polyfills: ['fetch', 'promises', 'url'],

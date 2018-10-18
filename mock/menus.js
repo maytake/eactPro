@@ -5,6 +5,10 @@ const menus = [
     icon: 'setting',
     routes: [
       {
+        path: '/system/updateInfo',
+        name: '系统更新信息',
+      },
+      {
         path: '/system/role',
         name: '角色管理',
       },

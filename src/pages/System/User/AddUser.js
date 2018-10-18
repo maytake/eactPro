@@ -13,9 +13,8 @@ import {
   DatePicker,
   message,
 } from 'antd';
-import isEqual from 'lodash/isEqual';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
-import SearchModel from './SearchModel';
+import SearchModel from '@/components/SearchModel';
 import styles from './AddUser.less';
 
 const FormItem = Form.Item;
@@ -34,12 +33,15 @@ class AddUser extends PureComponent {
     super(props);
     this.state = {
       modalVisible: false,
+      columns:[],
+      tableData:[],
+      modelKey:'',
       current: {
         headOffice:'',
-        account:'',
+        group:'',
         shop:''
       },
-
+      selectedKeys:[]
     };
   }
 
@@ -49,12 +51,16 @@ class AddUser extends PureComponent {
     });
   };
 
-  handleAdd = fields => {
-    message.success('选择成功！');
-    const choiceValue = fields.map(item => item.name).join(',');
+  handleAdd = (fields) => {
+    const {selectedRowKeys,selectedRows,modelKey}=fields;
+    const choiceValue = selectedRows.map(item => item.name).join(',');
     this.props.form.setFieldsValue({
-        shop: choiceValue,
+      [modelKey]: choiceValue,
     });
+    this.setState({
+      selectedKeys:selectedRowKeys
+    })
+    message.success(modelKey);
     this.handleModalVisible();
   };
 
@@ -75,20 +81,9 @@ class AddUser extends PureComponent {
     });
   };
 
-  showChoice(value) {
-    console.log(value);
-    this.handleModalVisible(true);
-  }
-
-  render() {
-    const { modalVisible, current } = this.state;
-    const { history } = this.props;
-    const parentMethods = {
-      handleAdd: this.handleAdd,
-      handleModalVisible: this.handleModalVisible,
-    };
-
-    const columns = [
+  showChoice(value, name) {
+    let column=[],data=[];
+    column = [
       {
         title: '编码',
         dataIndex: 'code',
@@ -98,7 +93,6 @@ class AddUser extends PureComponent {
         title: '名称',
         dataIndex: 'name',
         sorter: (a, b) => {
-          // console.log(a.name.localeCompare(b.name, 'zh-CN'));
           return a.name.localeCompare(b.name, 'zh-CN');
         },
       },
@@ -110,8 +104,7 @@ class AddUser extends PureComponent {
         },
       },
     ];
-
-    const data = [
+     data = [
       {
         key: '1',
         code: 10524,
@@ -131,6 +124,44 @@ class AddUser extends PureComponent {
         describe: '漳州盈众汽车销售服务有限公司德化分公司是盈众集团旗',
       },
     ];
+    switch (name) {
+      case 'shop':
+        this.setState({
+          columns:column,
+          tableData:data,
+          modelKey:'shop',
+        })
+        break;
+      case 'headOffice':
+        this.setState({
+          columns:column,
+          tableData:data,
+          modelKey:'headOffice',
+        })  
+        break;
+      case 'group':
+        this.setState({
+          columns:column,
+          tableData:data,
+          modelKey:'group',
+        })  
+        break;
+      default:
+        break;
+    }
+    this.handleModalVisible(true);
+  }
+
+  render() {
+    const { modalVisible, current, columns, tableData, modelKey,selectedKeys } = this.state;
+    const { history } = this.props;
+    const parentMethods = {
+      handleAdd: this.handleAdd,
+      handleModalVisible: this.handleModalVisible,
+    };
+    const parentProps = {
+      columns, tableData, modelKey, selectedKeys 
+    }
 
     const { getFieldDecorator } = this.props.form;
     const formItemLayout = {
@@ -153,6 +184,7 @@ class AddUser extends PureComponent {
         sm: { span: 12 },
       },
     };
+
     const uploadButton = (
       <div>
         <Icon type={this.state.loading ? 'loading' : 'plus'} />
@@ -225,7 +257,7 @@ class AddUser extends PureComponent {
                         })(
                           <Search
                             placeholder="input search text"
-                            onSearch={value => this.showChoice(value)}
+                            onSearch={value => this.showChoice(value,'headOffice')}
                             enterButton
                           />
                         )}
@@ -238,7 +270,7 @@ class AddUser extends PureComponent {
                         })(
                           <Search
                             placeholder="input search text"
-                            onSearch={value => this.showChoice(value)}
+                            onSearch={value => this.showChoice(value, 'group')}
                             enterButton
                           />
                         )}
@@ -252,7 +284,7 @@ class AddUser extends PureComponent {
                         })(
                           <Search
                             placeholder="input search text"
-                            onSearch={value => this.showChoice(value)}
+                            onSearch={value => this.showChoice(value,'shop')}
                             enterButton
                           />
                         )}
@@ -328,7 +360,11 @@ class AddUser extends PureComponent {
             </FormItem>
           </Form>
         </Card>
-        <SearchModel modalVisible={modalVisible} {...parentMethods} columns={columns} data={data} />
+        <SearchModel 
+          modalVisible={modalVisible} 
+          {...parentMethods} 
+          {...parentProps}
+        />
       </PageHeaderWrapper>
     );
   }

@@ -18,7 +18,7 @@ export default [
     authority: ['admin', 'user'],
     routes: [
       // dashboard
-      { path: '/', redirect: '/system/role' },
+      { path: '/', redirect: '/system/updateInfo' },
       {
         path: '/home',
         name: 'home',
@@ -35,6 +35,11 @@ export default [
         name: '系统管理',
         icon: 'setting',
         routes: [
+          {
+            path: '/system/updateInfo',
+            name: '系统更新信息',
+            component: './System/UpdateInfo/UpdateInfo',
+          },
           {
             path: '/system/role',
             name: '角色管理',
