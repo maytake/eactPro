@@ -39,7 +39,7 @@ class SearchModel extends PureComponent {
     };
 
     const rowSelection = {
-      selectedRowKeys,
+     
       onChange: (_selectedRowKeys, _selectedRows) => {
         this.setState({
           selectedRowKeys:_selectedRowKeys,

@@ -1,29 +1,28 @@
 
-import { queryHomeDec } from '@/services/api';
+import { UpdateInfo } from '@/services/getApi';
 
 export default {
   namespace: 'updateInfo',
 
   state: {
-    Introduction: []
+    information: []
   },
 
   effects: {
-    *fetchBasic(_, { call, put }) {
-      const response = yield call(queryHomeDec);
+    *queryInfo(_, { call, put }) {
+      const response = yield call(UpdateInfo);
       yield put({
-        type: 'show',
+        type: 'updateIF',
         payload: response
       });
     },
-
   },
 
   reducers: {
-    show(state, {payload}) {
+    updateIF(state, {payload}) {
       return {
         ...state,
-        Introduction:payload
+        information:payload
       };
     },
   },

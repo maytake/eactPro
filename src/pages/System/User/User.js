@@ -73,9 +73,15 @@ const CreateForm = Form.create()(props => {
 }))
 @Form.create()
 class User extends PureComponent {
-  state = {
-    modalVisible: false,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      modalVisible: false,
+    };
+    this.handleSearch=this.handleSearch.bind(this);
+  }
+  
+  
 
   componentDidMount() {
     const { dispatch } = this.props;
@@ -107,6 +113,18 @@ class User extends PureComponent {
       })
     );
   }
+
+  handleSearch(e) {
+    e.preventDefault();
+    const { dispatch, form } = this.props;
+    form.validateFields((err, fieldsValue) => {
+      if (err) return;
+      dispatch({
+        type: 'rule/fetch',
+        payload: fieldsValue,
+      });
+    });
+  };
 
   renderForm() {
     const {
