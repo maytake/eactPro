@@ -21,6 +21,10 @@ const FormItem = Form.Item;
 const Option = Select.Option;
 const Search = Input.Search;
 
+@connect(({ userManagement, loading }) => ({
+  userManagement,
+  loadings: loading.models.userManagement,
+}))
 @Form.create()
 class AddUser extends PureComponent {
   colLayout = {
@@ -43,6 +47,13 @@ class AddUser extends PureComponent {
       },
       selectedKeys:[]
     };
+  }
+
+  componentDidMount(){
+    const {dispatch} = this.props;
+    dispatch({
+      type: 'userManagement/getUpdate',
+    });
   }
 
   handleModalVisible = flag => {
@@ -74,9 +85,21 @@ class AddUser extends PureComponent {
 
   handleSubmit = e => {
     e.preventDefault();
+    const {
+      dispatch,
+      userManagement: { addResult },
+    } = this.props;
+
     this.props.form.validateFields((err, values) => {
       if (!err) {
         console.log('Received values of form: ', values);
+        dispatch({
+          type: 'userManagement/add',
+          payload: {
+            desc: values,
+          },
+        });
+        message.success(addResult.msg);
       }
     });
   };
@@ -154,7 +177,8 @@ class AddUser extends PureComponent {
 
   render() {
     const { modalVisible, current, columns, tableData, modelKey,selectedKeys } = this.state;
-    const { history } = this.props;
+    const { history, userManagement: { updateResult }, } = this.props;
+    console.log(updateResult);
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,

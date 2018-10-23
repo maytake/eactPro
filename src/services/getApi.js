@@ -15,7 +15,6 @@ export async function AddResource(params) {
     method: 'POST',
     body: {
       ...params,
-      method: 'post',
     },
   });
 }
@@ -32,6 +31,10 @@ export async function getUserList(params) {
   return request(`/api/UserList?${stringify(params)}`);
 }
 
+export async function getUserUpdate(params) {
+  return request(`/api/getUpdate?${stringify(params)}`);
+}
+
 export async function RemoveUserList(params) {
   return request(`/api/RomoveUser?${stringify(params)}`);
 }
@@ -39,27 +42,18 @@ export async function RemoveUserList(params) {
 export async function AddUserList(params) {
   return request('/api/AddResource', {
     method: 'POST',
-    body: {
-      ...params,
-      method: 'post',
-    },
+    body:params
   });
 }
 
 export async function SetUserPassword(params) {
   return request('/api/SetUserPassword', {
     method: 'POST',
-    body: {
-      ...params,
-      method: 'post',
-    },
+    body:params,
   });
 }
 
-export async function UserStart(params) {
-  return request(`/api/UserStart?${stringify(params)}`);
+export async function ChangeStatus(params) {
+  return request(`/api/ChangeStatus?${stringify(params)}`);
 }
 
-export async function UserStop(params) {
-  return request(`/api/UserStop?${stringify(params)}`);
-}

@@ -67,9 +67,9 @@ const CreateForm = Form.create()(props => {
   );
 });
 
-@connect(({ role, loading }) => ({
-  role,
-  loadings: loading.effects['role/fetchBasic'],
+@connect(({ userManagement, loading }) => ({
+  userManagement,
+  loadings: loading.effects['userManagement/fetchUser'],
 }))
 @Form.create()
 class User extends PureComponent {
@@ -77,16 +77,15 @@ class User extends PureComponent {
     super(props);
     this.state = {
       modalVisible: false,
+      FormValues:{},
     };
     this.handleSearch=this.handleSearch.bind(this);
   }
   
-  
-
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'userManagement/fetchBasic',
+      type: 'userManagement/fetchUser',
     });
   }
 
@@ -96,31 +95,80 @@ class User extends PureComponent {
     });
   };
 
-  handleAdd = fields => {
-    message.success(fields.desc);
+  handleAdd = () => {
+    const id = this.state.FormValues.key;
+    const {
+      dispatch,
+      userManagement: { setResult },
+    } = this.props;
+    dispatch({
+      type: 'userManagement/setPassword',
+      payload: {
+        desc: id,
+      },
+    });
+    message.success(setResult.msg);
     this.handleModalVisible();
   };
 
-  deleteItem(id) {
-    message.success('This is a message of success ');
-    console.log(id);
+  
+  SwitchStatus = (status, id) => {
+    const {
+      dispatch,
+      userManagement: { statusResult },
+    } = this.props;
+    dispatch({
+      type: 'userManagement/changeStatus',
+      payload: {
+        desc: id,
+        status,
+      },
+/*       callback: (n) => {
+        message.success(n.msg);
+      }, */
+    });
+    message.success(statusResult.msg);
+  };
+
+  SetPassword = (record)=>{
+    this.setState({
+      FormValues: record || {},
+    });
+    this.handleModalVisible(true);
+  }
+ 
+  deleteItem=(id)=> {
+    const {
+      dispatch,
+      userManagement: { reomveResult },
+    } = this.props;
+    dispatch({
+      type: 'userManagement/remove',
+      payload: {
+        desc: id,
+      },
+    });
+    message.success(reomveResult.msg);
+    dispatch({
+      type: 'userManagement/fetchUser',
+    });
   }
 
-  Add() {
+  Add=()=> {
     this.props.dispatch(
       routerRedux.push({
         pathname: '/system/user/adduser',
       })
     );
   }
-
-  handleSearch(e) {
+  
+  handleSearch=(e)=> {
     e.preventDefault();
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
       dispatch({
-        type: 'rule/fetch',
+        type: 'userManagement/fetchUser',
         payload: fieldsValue,
       });
     });
@@ -148,7 +196,12 @@ class User extends PureComponent {
   }
 
   render() {
-    const { dispatch, cardsLoading } = this.props;
+    const {
+      userManagement:{
+        dataSource,
+      },
+      loadings,
+    } = this.props;
 
     const { modalVisible } = this.state;
 
@@ -164,10 +217,7 @@ class User extends PureComponent {
       pageSize: 10,
     };
 
-    const SwitchStatus = (key, status, id) => {
-      message.success(status);
-    };
-
+  
     const Delete = (key, currentId) => {
       Modal.confirm({
         title: '删除角色',
@@ -177,32 +227,7 @@ class User extends PureComponent {
         onOk: () => this.deleteItem(currentId),
       });
     };
-    const dataSource = [
-      {
-        key: '0',
-        account: '112267',
-        name: '温晶晶',
-        time: '2018-08-08 12:06:27',
-        agency: '惠安盈众',
-        role: '销售顾问',
-        phone: '15906013968',
-        email: '	xiaolin.xie@enjoyauto.com	',
-        mall: '商城',
-        status: '1',
-      },
-      {
-        key: '1',
-        account: '212267',
-        name: '温晶晶',
-        time: '2018-08-08 12:06:27',
-        agency: '惠安盈众',
-        role: '销售顾问',
-        phone: '15906013968',
-        email: '	xiaolin.xie@enjoyauto.com	',
-        mall: '商城',
-        status: '2',
-      },
-    ];
+
 
     const columns = [
       {
@@ -268,7 +293,7 @@ class User extends PureComponent {
               <Tooltip title={start ? '启用' : '停用'}>
                 <Button
                   icon={start ? 'play-circle' : 'pause-circle'}
-                  onClick={({ key }) => SwitchStatus(key, record.status, record.key)}
+                  onClick={() => this.SwitchStatus(record.status, record.key)}
                   type="primary"
                   style={{ marginRight: '8px' }}
                 />
@@ -276,7 +301,7 @@ class User extends PureComponent {
               <Tooltip title="设置">
                 <Button
                   icon="setting"
-                  onClick={() => this.handleModalVisible(true)}
+                  onClick={() => this.SetPassword(record)}
                   type="primary"
                   style={{ marginRight: '8px' }}
                 />
@@ -284,7 +309,7 @@ class User extends PureComponent {
               <Tooltip title="删除">
                 <Button
                   icon="delete"
-                  onClick={({ key }) => Delete(key, record.key)}
+                  onClick={() => Delete(record.key)}
                   type="primary"
                 />
               </Tooltip>
@@ -308,10 +333,10 @@ class User extends PureComponent {
             </div>
 
             <Table
-              dataSource={dataSource}
+              dataSource={dataSource.dataSource}
               pagination={paginationProps}
               columns={columns}
-              loading={cardsLoading}
+              loading={loadings}
               scroll={{ x: '110%' }}
             />
           </div>
