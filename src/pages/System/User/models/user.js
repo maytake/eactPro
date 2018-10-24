@@ -1,10 +1,10 @@
 
-import { getUserList, getUserUpdate, AddUserList, RemoveUserList, SetUserPassword, ChangeStatus } from '@/services/getApi';
+import { getUserList,  AddUserList, RemoveUserList, SetUserPassword, ChangeStatus } from '@/services/getApi';
 
 export default {
   namespace: 'userManagement',
   state: {
-    updateResult:{},
+
     dataSource: {},
     addResult: {},
     reomveResult: {},
@@ -19,14 +19,6 @@ export default {
         type: 'queryList',
         payload: response,
       });
-    },
-    *getUpdate({ payload, callback }, { call, put }) {
-      const response = yield call(getUserUpdate, payload);
-      yield put({
-        type: 'getUpdateList',
-        payload: response,
-      });
-      if (callback) callback();
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(AddUserList, payload);
@@ -68,12 +60,6 @@ export default {
       return {
         ...state,
         dataSource: payload,
-      };
-    },
-    getUpdateList(state, { payload }) {
-      return {
-        ...state,
-        updateResult: payload,
       };
     },
     addList(state, { payload }) {

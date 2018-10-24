@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
+import router from 'umi/router';
 import {
   Row,
   Col,
@@ -100,6 +101,9 @@ class AddUser extends PureComponent {
           },
         });
         message.success(addResult.msg);
+        router.push({
+          pathname: '/system/user',
+        })
       }
     });
   };

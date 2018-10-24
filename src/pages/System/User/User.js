@@ -1,7 +1,6 @@
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
-import { routerRedux } from 'dva/router';
-
+import router from 'umi/router';
 import { Row, Card, Form, Input, Button, Modal, message, Table, Tooltip } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './User.less';
@@ -83,9 +82,13 @@ class User extends PureComponent {
   }
   
   componentDidMount() {
-    const { dispatch } = this.props;
+    const { dispatch, location } = this.props;
+    const params = location.query;
     dispatch({
       type: 'userManagement/fetchUser',
+      payload:{
+        desc:params
+      }
     });
   }
 
@@ -102,7 +105,7 @@ class User extends PureComponent {
       userManagement: { setResult },
     } = this.props;
     dispatch({
-      type: 'userManagement/setPassword',
+      type: 'userManagement/getUpdate',
       payload: {
         desc: id,
       },
@@ -155,11 +158,11 @@ class User extends PureComponent {
   }
 
   Add=()=> {
-    this.props.dispatch(
-      routerRedux.push({
-        pathname: '/system/user/adduser',
-      })
-    );
+  
+    router.push({
+      pathname: '/system/user/adduser',
+    })
+    
   }
   
   handleSearch=(e)=> {
@@ -167,6 +170,10 @@ class User extends PureComponent {
     const { dispatch, form } = this.props;
     form.validateFields((err, fieldsValue) => {
       if (err) return;
+      router.push({
+        pathname: '/system/user',
+        query:fieldsValue
+      })
       dispatch({
         type: 'userManagement/fetchUser',
         payload: fieldsValue,
@@ -183,7 +190,7 @@ class User extends PureComponent {
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row>
           <FormItem>{getFieldDecorator('shipname')(<Input placeholder="4s店名称" />)}</FormItem>
-          <FormItem>{getFieldDecorator('account ')(<Input placeholder="账号" />)}</FormItem>
+          <FormItem>{getFieldDecorator('account')(<Input placeholder="账号" />)}</FormItem>
           <FormItem>{getFieldDecorator('name')(<Input placeholder="姓名" />)}</FormItem>
           <FormItem>
             <Button type="primary" htmlType="submit">

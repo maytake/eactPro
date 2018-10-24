@@ -20,7 +20,7 @@ class TableForm extends PureComponent {
 
     static getDerivedStateFromProps(nextProps, preState) {
         if (isEqual(nextProps.value, preState.value)) {
-          console.log(preState.value);
+          // console.log(preState.value);
           return null;
         }
         return {

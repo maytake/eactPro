@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import moment from 'moment';
-import { routerRedux } from 'dva/router';
+import router from 'umi/router';
 import { Row, Col, Card, Form, Input, Button, Modal, message, Table, Tooltip } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import AddResource from './AddResource';
@@ -21,6 +21,7 @@ class Resource extends PureComponent {
     this.handleSearch = this.handleSearch.bind(this);
     this.state = {
       modalVisible: false,
+      current:{},
     };
   }
 
@@ -62,6 +63,10 @@ class Resource extends PureComponent {
       type: 'resource/fetchResource',
       payload: { name: v },
     });
+    router.push({
+      pathname: '/system/resource',
+      query:{name:v}
+    })
   }
 
   deleteItem(id) {
@@ -81,21 +86,18 @@ class Resource extends PureComponent {
     });
   }
 
-  Add() {
-    this.handleModalVisible(true);
-  }
-
-
-
   render() {
+    const {current}=this.state;
     const {
       loading,
       resource: { dataSource },
     } = this.props;
+  
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
+
     const paginationProps = {
       showSizeChanger: true,
       showQuickJumper: true,
@@ -114,9 +116,29 @@ class Resource extends PureComponent {
       });
     };
     const roleEdit = (key, id) => {
+      const { 
+        dispatch, 
+      } = this.props;
+      dispatch({
+        type: 'resource/getUpdate',
+        payload: {
+          desc: id,
+        },
+        callback: (data) => {
+          this.setState({
+            current:data,
+          })
+        },
+      });
+      
       this.handleModalVisible(true);
     };
-
+    const Add=()=> {
+      this.setState({
+        current:{},
+      })
+      this.handleModalVisible(true);
+    }
     const columns = [
       {
         title: '名称',
@@ -170,7 +192,7 @@ class Resource extends PureComponent {
         <Card bordered={false}>
           <div className={styles.tableList}>
             <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.Add()}>
+              <Button icon="plus" type="primary" onClick={() => Add()}>
                 新建
               </Button>
               <Search
@@ -189,7 +211,7 @@ class Resource extends PureComponent {
             />
           </div>
         </Card>
-        <AddResource modalVisible={this.state.modalVisible} {...parentMethods} />
+        <AddResource modalVisible={this.state.modalVisible} {...parentMethods} updateResult={current} />
       </PageHeaderWrapper>
     );
   }

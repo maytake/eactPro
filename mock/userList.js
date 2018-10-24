@@ -25,18 +25,6 @@ const dataSource = [
     },
 ];
 
-const content = {
-    name: "酷酷的",
-    category: 150, 
-    members:[ 
-        {key: "1", type: "lucy", name: "John Brown", permission: "New York No. 1 Lake Park"},
-        {key: "2", type: "jack", name: "Jim Green", permission: "London No. 1 Lake Park"}
-    ],
-    permission: "authority", 
-    visibleRange: "2", 
-    urlPath: "/system/resource",
-}
-
 
 export default {
     'GET /api/UserList': (req, res) => {
@@ -62,7 +50,5 @@ export default {
             res.send({ status: 'ok', msg: '停用成功!' });
         }
     },
-    'GET /api/getUpdate': (req, res) => {
-        res.send({ status: 'ok', content,});
-    },
+
 }

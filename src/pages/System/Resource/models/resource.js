@@ -1,9 +1,10 @@
-import { Resource, AddResource, RemoveResource } from '@/services/getApi';
+import { Resource, AddResource, getUserUpdate, RemoveResource } from '@/services/getApi';
 
 export default {
   namespace: 'resource',
 
   state: {
+    updateResult:{},
     dataSource: [],
     addResult: {},
     reomveResult: {},
@@ -16,6 +17,14 @@ export default {
         type: 'queryList',
         payload: response,
       });
+    },
+    *getUpdate({ payload, callback }, { call, put }) {
+      const response = yield call(getUserUpdate, payload);
+      yield put({
+        type: 'getUpdateList',
+        payload: response,
+      });
+      if (callback) callback(response);
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(AddResource, payload);
@@ -40,6 +49,12 @@ export default {
       return {
         ...state,
         dataSource: payload,
+      };
+    },
+    getUpdateList(state, { payload }) {
+      return {
+        ...state,
+        updateResult: payload,
       };
     },
     addList(state, { payload }) {

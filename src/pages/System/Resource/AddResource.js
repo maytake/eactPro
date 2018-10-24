@@ -9,7 +9,8 @@ const SelectOption = Select.Option;
 
 @Form.create()
 class AddResource extends PureComponent {
-  state = {};
+  state = {
+  };
 
   formLayout = {
     labelCol: { className: 'labelName' },
@@ -26,12 +27,17 @@ class AddResource extends PureComponent {
     sm: 24,
   };
 
+  
   render() {
     const {
       form: { getFieldDecorator },
+      updateResult
     } = this.props;
 
-    const { current = {} } = this.state;
+
+     
+    const current=updateResult.content?updateResult.content:{};
+    console.log(current);
     const { modalVisible, form, handleAdd, handleModalVisible } = this.props;
     const okHandle = () => {
       form.validateFields((err, fieldsValue) => {
@@ -67,20 +73,7 @@ class AddResource extends PureComponent {
       },
     ];
 
-    const tableData = [
-      {
-        key: '1',
-        type: 'lucy',
-        name: 'John Brown',
-        permission: 'New York No. 1 Lake Park',
-      },
-      {
-        key: '2',
-        type: 'jack',
-        name: 'Jim Green',
-        permission: 'London No. 1 Lake Park',
-      },
-    ];
+ 
 
     const getModalContent = () => {
       return (
@@ -161,7 +154,7 @@ class AddResource extends PureComponent {
           <Row gutter={24}>
             <FormItem label="按钮明细" {...this.tableLayout}>
               {getFieldDecorator('members', {
-                initialValue: tableData,
+                initialValue: current.members,
               })(<TableForm />)}
             </FormItem>
           </Row>
