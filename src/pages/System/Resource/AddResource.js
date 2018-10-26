@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import { Input, Modal, Form, Select, Row, Col } from 'antd';
+import isEqual from 'lodash/isEqual';
 import TableForm from './TableForm';
 import styles from './AddResource.less';
 
@@ -9,8 +10,6 @@ const SelectOption = Select.Option;
 
 @Form.create()
 class AddResource extends PureComponent {
-  state = {
-  };
 
   formLayout = {
     labelCol: { className: 'labelName' },
@@ -27,16 +26,30 @@ class AddResource extends PureComponent {
     sm: 24,
   };
 
-  
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: props.updateResult,
+    };
+  }
+
+  static getDerivedStateFromProps(nextProps, preState) {
+    console.log(nextProps);
+    console.log(preState);
+    if (isEqual(nextProps.updateResult, preState.data)) {
+      return null;
+    }
+    return {
+      data: nextProps.updateResult,
+    };
+  }
+
   render() {
     const {
       form: { getFieldDecorator },
-      updateResult
     } = this.props;
-
-
-     
-    const current=updateResult.content?updateResult.content:{};
+    const {data} = this.state;
+    const current=data.content?data.content:{};
     console.log(current);
     const { modalVisible, form, handleAdd, handleModalVisible } = this.props;
     const okHandle = () => {

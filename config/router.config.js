@@ -88,7 +88,18 @@ export default [
 
         ],
       },
-
+      {
+        path: '/base',
+        name: '系统管理',
+        icon: 'bar-chart',
+        routes: [
+          {
+            path: '/base/memberRights',
+            name: '会员权益',
+            component: './Base/MemberRights/MemberRights',
+          },
+        ],
+      },
       {
         path: '/dashboard',
         name: 'dashboard',

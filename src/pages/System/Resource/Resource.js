@@ -20,7 +20,7 @@ class Resource extends PureComponent {
     super(props);
     this.handleSearch = this.handleSearch.bind(this);
     this.state = {
-      modalVisible: false,
+      loading: false,
       current:{},
     };
   }

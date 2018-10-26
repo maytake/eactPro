@@ -16,15 +16,12 @@ import RoleTree from '@/components/RoleTree'
 const FormItem = Form.Item;
 const Option = Select.Option;
 
-@connect(({ addRole, loading }) => ({
-    addRole,
-    loadings: loading.effects['addRole/fetchBasic'],
+@connect(({ role, loading }) => ({
+    role,
+    cardsLoading: loading.models.role,
 }))
 @Form.create()
 class AddRole extends PureComponent {
-    state = {
-
-    }
 
     colLayout = {
         xl:6, 
@@ -32,12 +29,26 @@ class AddRole extends PureComponent {
         sm:24,
     };
 
-
+    constructor(props) {
+        super(props);
+        this.state = {
+  
+        };
+      }
+    
     componentDidMount() {
-        const { dispatch } = this.props;
-        dispatch({
-            type: 'AddRole/fetchBasic',
-        });
+        const { dispatch} = this.props;
+        const id=this.props.location.query.id;
+        if(id){
+            
+              dispatch({
+                type: 'role/getUpdate',
+                payload: {
+                  desc: id,
+                },
+              });
+        }
+
     };
 
     handleSubmit = (e) => {
@@ -50,12 +61,21 @@ class AddRole extends PureComponent {
     }
 
     render() {
-        const { addRole, cardsLoading, history } = this.props;
+        const { 
+            role:{updateResult}, 
+            cardsLoading, 
+            history } = this.props;
         const { getFieldDecorator } = this.props.form;
-        console.log(this.props.location.query.id);
+        const id=this.props.location.query.id;
+        let current;
+        if(id){
+             current=updateResult.content?updateResult.content:{};
+        }else{
+             current={};
+        }   
         return (
             <PageHeaderWrapper>
-                <Card bordered={false}>
+                <Card bordered={false} loading={cardsLoading}>
                     <h1 className={styles.roleTitle}>新增角色</h1>
                     <Form onSubmit={this.handleSubmit} className="ant-advanced-search-form">
                         <div className={styles.roleForm}>
@@ -65,6 +85,7 @@ class AddRole extends PureComponent {
                                     <FormItem label='角色名称：'>
                                         {getFieldDecorator('roleName', {
                                             rules: [{ required: true, message: '请输入角色名称!' }],
+                                            initialValue: current.roleName,
                                         })(
                                             <Input placeholder="请输入角色名称" />
                                         )}
@@ -74,8 +95,9 @@ class AddRole extends PureComponent {
                                     <FormItem label='角色编码：'>
                                         {getFieldDecorator('roleCode', {
                                             rules: [{ required: true, message: '请输入角色编码!' }],
+                                            initialValue: current.roleCode,
                                         })(
-                                            <Input type="password" placeholder="请输入角色编码" />
+                                            <Input type="text" placeholder="请输入角色编码" />
                                         )}
                                     </FormItem>
                                 </Col>
@@ -83,6 +105,7 @@ class AddRole extends PureComponent {
                                     <FormItem label='角色状态：'>
                                         {getFieldDecorator('status', {
                                             rules: [{ required: true, message: '请选择角色状态!' }],
+                                            initialValue: current.status,
                                         })(
                                             <Select
                                                 placeholder="请选择角色状态"
@@ -98,6 +121,7 @@ class AddRole extends PureComponent {
                                     <FormItem label='角色类型：'>
                                         {getFieldDecorator('type', {
                                             rules: [{ required: true, message: '请选择角色类型!' }],
+                                            initialValue: current.type,
                                         })(
                                             <Select
                                                 placeholder="请选择角色类型"
@@ -118,7 +142,11 @@ class AddRole extends PureComponent {
                         <h1 className={styles.roleTitle} style={{ marginBottom: '-1px' }}>权限列表</h1>
                         <div className={styles.roleAuthority}>
                             <div className={styles.roleBorder}>
-                                <RoleTree />            
+                                <FormItem>
+                                    {getFieldDecorator('permission', {
+                                        initialValue: current.permission,
+                                    })(<RoleTree /> )}
+                                </FormItem>           
                             </div>
                         </div>
 

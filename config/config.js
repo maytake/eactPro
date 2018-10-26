@@ -95,12 +95,12 @@ export default {
   },
   proxy: {
 /*     "/api": {
-      "target": "http://192.168.11.81/",
+      "target": "http://192.168.21.99:9090",
       "changeOrigin": true,
       "pathRewrite": { "^/api" : "" }
     }, */
-    '/couponSys':{
-      target: "https://ceshi.lechengclub.com",
+    '/CRM':{
+      target: "http://192.168.21.99:9090",
       changeOrigin: true,
     },
 

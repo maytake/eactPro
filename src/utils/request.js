@@ -99,7 +99,7 @@ export default function request(
         'Content-Type': 'application/json; charset=utf-8',
         ...newOptions.headers,
       };
-      newOptions.body={...newOptions.body,token: localStorage.getItem('userToken')}
+      newOptions.body={...newOptions.body,userToken: localStorage.getItem('userToken')}
       newOptions.body = JSON.stringify(newOptions.body);
     } else {
       // newOptions.body is FormData

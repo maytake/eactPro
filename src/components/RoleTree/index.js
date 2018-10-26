@@ -61,17 +61,28 @@ const getParentKey = (key, tree) => {
 };
 
 class RoleTree extends PureComponent {
-  state = {
-    expandedKeys: [],
-    searchValue: '',
-    autoExpandParent: true,
+  constructor(props) {
+    super(props);
+    this.state = {
+      expandedKeys: props.value,
+      checkedKeys: props.value,
+      searchValue: '',
+      autoExpandParent: true,
+    }
   }
+
 
   onExpand = (expandedKeys) => {
     this.setState({
       expandedKeys,
       autoExpandParent: false,
     });
+  }
+
+  onCheck = (checkedKeys) => {
+    const { onChange }=this.props;
+    this.setState({ checkedKeys });
+    onChange(checkedKeys);
   }
 
   onChange = (e) => {
@@ -90,7 +101,7 @@ class RoleTree extends PureComponent {
   }
 
   render() {
-    const { searchValue, expandedKeys, autoExpandParent } = this.state;
+    const { searchValue, expandedKeys, checkedKeys, autoExpandParent } = this.state;
     const loop = data => data.map((item) => {
       const index = item.title.indexOf(searchValue);
       const beforeStr = item.title.substr(0, index);
@@ -117,6 +128,8 @@ class RoleTree extends PureComponent {
         <Tree
           checkable
           onExpand={this.onExpand}
+          checkedKeys={checkedKeys}
+          onCheck={this.onCheck}
           expandedKeys={expandedKeys}
           autoExpandParent={autoExpandParent}
         >

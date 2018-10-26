@@ -1,29 +1,72 @@
-
-import { queryHomeDec } from '@/services/api';
+import { getRoleList, AddRoleList, RemoveRoleList, getRoleUpdate } from '@/services/getApi';
 
 export default {
   namespace: 'role',
 
   state: {
-    Introduction: []
+    updateResult:{},
+    addResult: {},
+    reomveResult: {},
+    data: {},
   },
 
   effects: {
-    *fetchBasic(_, { call, put }) {
-      const response = yield call(queryHomeDec);
+    *fetchData({ payload }, { call, put }) {
+      const response = yield call(getRoleList, payload);
       yield put({
-        type: 'show',
-        payload: response
+        type: 'queryList',
+        payload: response,
       });
     },
-
+    *add({ payload, callback }, { call, put }) {
+      const response = yield call(AddRoleList, payload);
+      yield put({
+        type: 'queryList',
+        payload: response,
+      });
+      if (callback) callback(response);
+    },
+    *remove({ payload, callback }, { call, put }) {
+      const response = yield call(RemoveRoleList, payload);
+      yield put({
+        type: 'queryList',
+        payload: response,
+      });
+      if (callback) callback(response);
+    },
+    *getUpdate({ payload, callback }, { call, put }) {
+      const response = yield call(getRoleUpdate, payload);
+      yield put({
+        type: 'getUpdateList',
+        payload: response,
+      });
+      if (callback) callback(response);
+    },
   },
 
   reducers: {
-    show(state, {payload}) {
+    queryList(state, { payload }) {
       return {
         ...state,
-        Introduction:payload
+        data: payload,
+      };
+    },
+    getUpdateList(state, { payload }) {
+      return {
+        ...state,
+        updateResult: payload,
+      };
+    },
+    addList(state, { payload }) {
+      return {
+        ...state,
+        addResult: payload,
+      };
+    },
+    removeList(state, { payload }) {
+      return {
+        ...state,
+        reomveResult: payload,
       };
     },
   },

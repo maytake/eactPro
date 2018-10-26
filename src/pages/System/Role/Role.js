@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
 import moment from 'moment';
+import router from 'umi/router';
 import { routerRedux } from 'dva/router';
 import {
     Row,
@@ -22,24 +23,50 @@ const { Search } = Input;
 
 @connect(({ role, loading }) => ({
     role,
-    loadings: loading.effects['role/fetchBasic'],
+    loading: loading.models.role,
 }))
 @Form.create()
 class Role extends PureComponent {
-    state = {
-
-    };
+    constructor(props) {
+        super(props);
+        this.handleSearch = this.handleSearch.bind(this);
+        this.state = {
+       
+        };
+    }
 
     componentDidMount() {
         const { dispatch } = this.props;
         dispatch({
-            type: 'role/fetchBasic',
+            type: 'role/fetchData',
         });
     };
 
+    handleSearch(v) {
+        const { dispatch } = this.props;
+        dispatch({
+          type: 'role/fetchData',
+          payload: { name: v },
+        });
+        router.push({
+          pathname: '/system/role',
+          query:{name:v}
+        })
+      }
+
     deleteItem(id) {
-        message.success('This is a message of success ');
-        console.log(id);
+        const {
+            dispatch,
+          } = this.props;
+          dispatch({
+            type: 'role/remove',
+            payload: {
+              desc: id,
+            },
+            callback: (data) => {
+                message.success(data.msg);
+              },
+          });
     };
 
     AddRole(){
@@ -71,13 +98,16 @@ class Role extends PureComponent {
     };
 
     render() {
-        const {dispatch, role, cardsLoading } = this.props;
+        const {dispatch, 
+            role:{data}, 
+            loading } = this.props;
+        const datas =data.dataSource;
+        if(!datas){return null}
+        const { list, pagination }=datas;
         const paginationProps = {
             showSizeChanger: true,
             showQuickJumper: true,
-            defaultCurrent:2,
-            total:100,
-            pageSize:10,
+            ...pagination,
           };
 
         const roleDelete = (key, currentId) => {
@@ -96,20 +126,6 @@ class Role extends PureComponent {
             }))
         };
         
-        const dataSource = [{
-            key: '1',
-            name: '开发人员',
-            code: 1001031,
-            type: '4S店服务顾问',
-            status: '启用',
-        }, {
-            key: '2',
-            name: '开发人员',
-            code: 1001031,
-            type: '4S店服务顾问',
-            status: '启用',
-        }];
-
 
         const columns = [{
             title: '角色名称',
@@ -156,15 +172,15 @@ class Role extends PureComponent {
                                 className={styles.search}
                                 placeholder="请输入角色名称"
                                 enterButton="搜索"
-                                onSearch={value => console.log(value)}
+                                onSearch={this.handleSearch}
                             />
                         </div>
                         
                         <Table 
-                            dataSource={dataSource}
+                            dataSource={list}
                             pagination={paginationProps} 
                             columns={columns} 
-                            loading={cardsLoading} 
+                            loading={loading} 
                         />
                     </div>
                 </Card>

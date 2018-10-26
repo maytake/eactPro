@@ -1,6 +1,17 @@
 import { stringify } from 'qs';
 import request from '@/utils/request';
 
+// test
+export async function Login(params) {
+  return request('/CRM/mbe3/mgrLogin/userLogin.json', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
+
+
 // resource
 export async function Resource(params) {
   return request(`/api/Resource?${stringify(params)}`);
@@ -57,3 +68,22 @@ export async function ChangeStatus(params) {
   return request(`/api/ChangeStatus?${stringify(params)}`);
 }
 
+// role
+export async function getRoleList(params) {
+  return request(`/api/RoleList?${stringify(params)}`);
+}
+
+export async function AddRoleList(params) {
+  return request('/api/AddRole', {
+    method: 'POST',
+    body:params
+  });
+}
+
+export async function RemoveRoleList(params) {
+  return request(`/api/RomoveRole?${stringify(params)}`);
+}
+
+export async function getRoleUpdate(params) {
+  return request(`/api/getRoleUpdate?${stringify(params)}`);
+}

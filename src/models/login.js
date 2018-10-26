@@ -21,7 +21,7 @@ export default {
       });
       // Login successfully
       if (response.status === 'ok') {
-        localStorage.setItem('userToken',response.token);
+        localStorage.setItem('userToken',response.userToken);
         reloadAuthorized();
         const urlParams = new URL(window.location.href);
         const params = getPageQuery();

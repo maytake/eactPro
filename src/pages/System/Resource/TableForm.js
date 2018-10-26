@@ -52,7 +52,7 @@ class TableForm extends PureComponent {
     }
 
     permissionAdd() {
-        const { data } = this.state;
+        const { data=[] } = this.state;
         const newData = data.map(item => ({ ...item }));
         const item = {
             key: `NEW_ID_${this.index}`,

@@ -20,6 +20,8 @@ class TableForm extends PureComponent {
   }
 
   static getDerivedStateFromProps(nextProps, preState) {
+    // console.log(nextProps);
+    // console.log(preState);
     if (isEqual(nextProps.value, preState.value)) {
       return null;
     }
@@ -134,6 +136,7 @@ class TableForm extends PureComponent {
   }
 
   render() {
+    console.log(11);
     const columns = [
       {
         title: '成员姓名',
