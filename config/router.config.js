@@ -51,6 +51,11 @@ export default [
             component: './System/User/User',
           },
           {
+            path: '/system/menuManage',
+            name: '菜单管理',
+            component: './System/MenuManage/MenuManage',
+          },
+          {
             path: '/system/resource',
             name: '资源管理',
             component: './System/Resource/Resource',
@@ -90,7 +95,7 @@ export default [
       },
       {
         path: '/base',
-        name: '系统管理',
+        name: '基础数据',
         icon: 'bar-chart',
         routes: [
           {
@@ -99,6 +104,34 @@ export default [
             component: './Base/MemberRights/MemberRights',
           },
         ],
+      },
+      {
+        path: '/member',
+        name: '会员管理',
+        icon: 'user',
+        routes: [
+          {
+            path: '/member/memberProfile',
+            name: '会员档案',
+            component: './member/MemberProfile/MemberProfile',
+          },
+          {
+            path: '/member/memberProfile/addMember',
+            name: '新建会员档案',
+            component: './member/MemberProfile/AddMember',
+            routes: [
+              {
+                path: '/member/memberProfile/addMember',
+                redirect: '/member/memberProfile/addMember/MemberInfo',
+              },
+              {
+                path: '/member/memberProfile/addMember/MemberInfo',
+                name: '会员信息',
+                component: './member/MemberProfile/MemberInfo',
+              },
+            ],
+          },
+        ]
       },
       {
         path: '/dashboard',

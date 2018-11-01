@@ -2,6 +2,7 @@ import fetch from 'dva/fetch';
 import { notification } from 'antd';
 import router from 'umi/router';
 import hash from 'hash.js';
+import MD5 from 'js-md5';
 import { isAntdPro } from './utils';
 
 const codeMessage = {
@@ -73,9 +74,22 @@ export default function request(
    * Produce fingerprints based on url and parameters
    * Maybe url has the same parameters
    */
- /*  options.body = Object.assign({}, options.body, {
-		token: localStorage.getItem('userToken')
-  }); */
+
+
+  // 验签
+  function getNonce() {
+    const chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+    let value = "";
+    const num = Math.floor(Math.random() * 25 + 8);
+    for (let i = 0; i < num; i++) {
+      const id = parseInt(Math.random() * 61, 10);
+      value += chars[id];
+    }
+    return value;
+  }
+  // end
+
+
 
   const fingerprint = url + (options.body ? JSON.stringify(options.body) : '');
   const hashcode = hash
@@ -99,8 +113,30 @@ export default function request(
         'Content-Type': 'application/json; charset=utf-8',
         ...newOptions.headers,
       };
-      newOptions.body={...newOptions.body,userToken: localStorage.getItem('userToken')}
-      newOptions.body = JSON.stringify(newOptions.body);
+
+      // 验签参数
+      const nonce = getNonce();
+      const ts = new Date().getTime().toString();
+      const content =JSON.stringify(newOptions.body);
+      let sign;
+      if(Object.keys(newOptions.body).length!==0){
+         sign = MD5(`content=${  content  }&nonce=${ nonce   }&signMethod=MD5&ts=${  ts  }&type=crm3&version=3.0&SECRET=AD7061F216EC445083C921D7EDD85DEF`).toLowerCase();
+      }else{
+         sign = MD5(`nonce=${ nonce   }&signMethod=MD5&ts=${  ts  }&type=crm3&version=3.0&SECRET=AD7061F216EC445083C921D7EDD85DEF`).toLowerCase();
+      } 
+
+      const signParam = {
+        "content":Object.keys(newOptions.body).length!==0?content:'',
+        "ts": ts,
+        "signMethod": "MD5",
+        "type": "crm3",
+        "sign": sign,
+        "nonce": nonce,
+        "version": "3.0",
+        "userToken": localStorage.getItem('userToken')||'',
+      }
+  
+      newOptions.body = JSON.stringify(signParam);
     } else {
       // newOptions.body is FormData
       newOptions.headers = {

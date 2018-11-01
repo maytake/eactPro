@@ -104,7 +104,7 @@ export async function updateFakeList(params) {
 }
 
 export async function fakeAccountLogin(params) {
-  return request('/api/login/account', {
+  return request('/CRM/mbe3/mgrLogin/userLogin.json', {
     method: 'POST',
     body: params,
   });
@@ -136,6 +136,12 @@ export async function queryRoutes() {
   return request('/api/menus');
 }
 
+/* export async function queryRoutes() {
+  return request('/CRM/mbe3/mgrFunction/menu.json',{
+    method: 'POST',
+  });
+}
+ */
 export async function queryTest(params) {
   return request('/couponSys/login/login.json',{
     method: 'POST',

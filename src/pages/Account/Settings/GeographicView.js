@@ -10,8 +10,8 @@ const nullSlectItem = {
   key: '',
 };
 
-@connect(({ geographic }) => {
-  const { province, isLoading, city } = geographic;
+@connect(({ memberGeographic }) => {
+  const { province, isLoading, city } = memberGeographic;
   return {
     province,
     city,
@@ -22,7 +22,7 @@ class GeographicView extends PureComponent {
   componentDidMount = () => {
     const { dispatch } = this.props;
     dispatch({
-      type: 'geographic/fetchProvince',
+      type: 'memberGeographic/fetchProvince',
     });
   };
 
@@ -31,7 +31,7 @@ class GeographicView extends PureComponent {
 
     if (!props.value && !!value && !!value.province) {
       dispatch({
-        type: 'geographic/fetchCity',
+        type: 'memberGeographic/fetchCity',
         payload: value.province.key,
       });
     }
@@ -65,7 +65,7 @@ class GeographicView extends PureComponent {
   selectProvinceItem = item => {
     const { dispatch, onChange } = this.props;
     dispatch({
-      type: 'geographic/fetchCity',
+      type: 'memberGeographic/fetchCity',
       payload: item.key,
     });
     onChange({

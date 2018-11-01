@@ -16,7 +16,7 @@ const dataSource = {
     pagination: { 
         total: 46, 
         pageSize: 10, 
-        current: 1
+        defaultCurrent: 1
     }
 }
 

@@ -3,7 +3,7 @@ import request from '@/utils/request';
 
 // test
 export async function Login(params) {
-  return request('/CRM/mbe3/mgrLogin/userLogin.json', {
+  return request('/CRM/mbe3/mgrParentFunc/page.json', {
     method: 'POST',
     body: {
       ...params,
@@ -30,6 +30,27 @@ export async function AddResource(params) {
   });
 }
 
+// MenuManage
+export async function MenuManage(params) {
+  return request(`/api/MenuManage?${stringify(params)}`);
+}
+
+export async function RomoveMenu(params) {
+  return request(`/api/RomoveMenu?${stringify(params)}`);
+}
+
+export async function getMenuUpdate(params) {
+  return request(`/api/getMenuUpdate?${stringify(params)}`);
+}
+
+export async function AddMenu(params) {
+  return request('/api/AddMenu', {
+    method: 'POST',
+    body: {
+      ...params,
+    },
+  });
+}
 
 // home
 export async function UpdateInfo() {

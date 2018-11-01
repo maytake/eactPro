@@ -100,7 +100,7 @@ export default {
       "pathRewrite": { "^/api" : "" }
     }, */
     '/CRM':{
-      target: "http://192.168.21.99:9090",
+      target: "http://192.168.21.211:8080",
       changeOrigin: true,
     },
 

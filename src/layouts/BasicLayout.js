@@ -130,6 +130,7 @@ class BasicLayout extends React.PureComponent {
 
   getMenuData() {
     const {menuData} = this.props;
+    // console.log(menuData)
     return formatter(menuData);
   }
 

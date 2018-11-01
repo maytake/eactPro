@@ -1,7 +1,7 @@
 import { queryProvince, queryCity } from '@/services/geographic';
 
 export default {
-  namespace: 'geographic',
+  namespace: 'memberGeographic',
 
   state: {
     province: [],

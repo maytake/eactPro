@@ -17,6 +17,10 @@ const menus = [
         name: '用户管理',
       },
       {
+        path: '/system/menuManage',
+        name: '菜单管理',
+      },
+      {
         path: '/system/resource',
         name: '资源管理',
       },
@@ -38,44 +42,7 @@ const menus = [
       },
     ],
   },
-  // list
-  {
-    path: '/list',
-    icon: 'table',
-    name: 'list',
-    routes: [
-      {
-        path: '/list/table-list',
-        name: 'searchtable',
-      },
-      {
-        path: '/list/basic-list',
-        name: 'basiclist',
-      },
-      {
-        path: '/list/card-list',
-        name: 'cardlist',
-      },
-      {
-        path: '/list/search',
-        name: 'searchlist',
-        routes: [
-          {
-            path: '/list/search/articles',
-            name: 'articles',
-          },
-          {
-            path: '/list/search/projects',
-            name: 'projects',
-          },
-          {
-            path: '/list/search/applications',
-            name: 'applications',
-          },
-        ],
-      },
-    ],
-  },
+
   {
     path: '/base',
     name: '基础数据',
@@ -156,7 +123,12 @@ const menus = [
     path: '/member',
     name: '会员管理',
     icon: 'user',
-    routes: []
+    routes: [
+      {
+        path: '/member/memberProfile',
+        name: '会员档案',
+      },
+    ]
   },
   {
     path: '/points',

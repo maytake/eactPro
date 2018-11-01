@@ -86,7 +86,24 @@ ol {
         text-align: right;
         margin-left: auto;
       }
+      .rightButton{
+        float: right;
+        text-align: right;
+        margin-left: auto;
+        & > button{
+          margin-left: 8px;
+        }
+      }
     }
   }
+  .ant-search-form {
+    .ant-form-item {
+        display: flex;
+    }
+  
+    .ant-form-item-control-wrapper {
+        flex: 1;
+    }
 
+}
 }

@@ -5,7 +5,7 @@ import { Checkbox, Alert, Icon } from 'antd';
 import Login from '@/components/Login';
 import styles from './Login.less';
 
-const {  UserName, Password,  Submit } = Login;
+const { UserName, Password, Submit } = Login;
 
 export default
 @connect(({ login, loading }) => ({
@@ -14,13 +14,10 @@ export default
 }))
 class LoginPage extends Component {
   state = {
-    type: 'account',
     autoLogin: true,
   };
 
-  onTabChange = type => {
-    this.setState({ type });
-  };
+
 
   onGetCaptcha = () =>
     new Promise((resolve, reject) => {
@@ -40,14 +37,14 @@ class LoginPage extends Component {
     });
 
   handleSubmit = (err, values) => {
-    const { type } = this.state;
+    const { autoLogin } = this.state;
     if (!err) {
       const { dispatch } = this.props;
       dispatch({
         type: 'login/login',
         payload: {
           ...values,
-          type,
+          // autoLogin,
         },
       });
     }
@@ -65,28 +62,25 @@ class LoginPage extends Component {
 
   render() {
     const { login, submitting } = this.props;
-    const { type, autoLogin } = this.state;
+    const { autoLogin } = this.state;
     return (
       <div className={styles.main}>
         <Login
-          defaultActiveKey={type}
-          onTabChange={this.onTabChange}
+
           onSubmit={this.handleSubmit}
           ref={form => {
             this.loginForm = form;
           }}
         >
-          {login.status === 'error' &&
-            login.type === 'account' &&
-            !submitting &&
+          {login.status === 'error' && !submitting &&
             this.renderMessage('账户或密码错误（admin/888888）')}
-          <UserName name="userName" placeholder="admin/user" />
+          <UserName name="username" placeholder="admin/user" />
           <Password
             name="password"
             placeholder="888888/123456"
             onPressEnter={() => this.loginForm.validateFields(this.handleSubmit)}
           />
-       
+
           <div>
             <Checkbox checked={autoLogin} onChange={this.changeAutoLogin}>
               自动登录

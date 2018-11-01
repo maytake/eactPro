@@ -17,10 +17,10 @@ export default {
       const response = yield call(fakeAccountLogin, payload);
       yield put({
         type: 'changeLoginStatus',
-        payload: response,
+        payload:{...response, currentAuthority: 'admin',} ,
       });
       // Login successfully
-      if (response.status === 'ok') {
+      if (response.errCode === 0) {
         localStorage.setItem('userToken',response.userToken);
         reloadAuthorized();
         const urlParams = new URL(window.location.href);

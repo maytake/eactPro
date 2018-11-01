@@ -4,18 +4,18 @@ import moment from 'moment';
 import router from 'umi/router';
 import { Row, Col, Card, Form, Input, Button, Modal, message, Table, Tooltip } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
-import AddResource from './AddResource';
-import styles from './Resource.less';
+import AddMenu from './AddMenu';
+import styles from './MenuManage.less';
 
 
 const { Search } = Input;
 
-@connect(({ resource, loading }) => ({
-  resource,
-  loading: loading.models.resource,
+@connect(({ menuManage, loading }) => ({
+    menuManage,
+  loading: loading.models.menuManage,
 }))
 @Form.create()
-class Resource extends PureComponent {
+class MenuManage extends PureComponent {
   constructor(props) {
     super(props);
     this.handleSearch = this.handleSearch.bind(this);
@@ -28,7 +28,7 @@ class Resource extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource/fetchResource',
+      type: 'menuManage/fetchData',
     });
   }
 
@@ -41,18 +41,18 @@ class Resource extends PureComponent {
   handleAdd = fields => {
     const {
       dispatch,
-      resource: { addResult },
+      menuManage: { addResult },
     } = this.props;
     dispatch({
-      type: 'resource/add',
+      type: 'menuManage/add',
       payload: {
-        desc: fields,
+        ...fields,
       },
     });
 
     message.success(addResult.msg);
     dispatch({
-      type: 'resource/fetchResource',
+      type: 'menuManage/fetchData',
     });
     this.handleModalVisible();
   };
@@ -60,11 +60,11 @@ class Resource extends PureComponent {
   handleSearch(v) {
     const { dispatch } = this.props;
     dispatch({
-      type: 'resource/fetchResource',
+      type: 'menuManage/fetchData',
       payload: { name: v },
     });
     router.push({
-      pathname: '/system/resource',
+      pathname: '/system/menuManage',
       query:{name:v}
     })
   }
@@ -72,17 +72,17 @@ class Resource extends PureComponent {
   deleteItem(id) {
     const {
       dispatch,
-      resource: { reomveResult },
+      menuManage: { reomveResult },
     } = this.props;
     dispatch({
-      type: 'resource/remove',
+      type: 'menuManage/remove',
       payload: {
         desc: id,
       },
     });
     message.success(reomveResult.msg);
     dispatch({
-      type: 'resource/fetchResource',
+      type: 'menuManage/fetchData',
     });
   }
 
@@ -90,22 +90,23 @@ class Resource extends PureComponent {
     const {current}=this.state;
     const {
       loading,
-      resource: { dataSource },
+      menuManage: { data },
     } = this.props;
-  
+    
+    const { list, pagination }=data;
+    if(!pagination){return null;}
+    const paginationProps = {
+        showSizeChanger: true,
+        showQuickJumper: true,
+        ...pagination,
+      };
+
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
     };
 
-    const paginationProps = {
-      showSizeChanger: true,
-      showQuickJumper: true,
-      defaultCurrent: 2,
-      total: 100,
-      pageSize: 10,
-    };
-
+    
     const roleDelete = (key, currentId) => {
       Modal.confirm({
         title: '删除角色',
@@ -120,7 +121,7 @@ class Resource extends PureComponent {
         dispatch, 
       } = this.props;
       dispatch({
-        type: 'resource/getUpdate',
+        type: 'menuManage/getUpdate',
         payload: {
           desc: id,
         },
@@ -151,15 +152,16 @@ class Resource extends PureComponent {
         key: 'url',
       },
       {
-        title: '权限字符串',
-        dataIndex: 'string',
-        key: 'string',
+        title: '图标',
+        dataIndex: 'icon',
+        key: 'icon',
       },
       {
-        title: '可见范围',
-        dataIndex: 'visibleRange',
-        key: 'visibleRange',
+        title: '排序编码',
+        dataIndex: 'code',
+        key: 'code',
       },
+
       {
         title: '操作',
         dataIndex: 'action',
@@ -205,15 +207,15 @@ class Resource extends PureComponent {
 
             <Table
               loading={loading}
-              dataSource={dataSource}
+              dataSource={list}
               pagination={paginationProps}
               columns={columns}
             />
           </div>
         </Card>
-        <AddResource modalVisible={this.state.modalVisible} {...parentMethods} updateResult={current} />
+        <AddMenu modalVisible={this.state.modalVisible} {...parentMethods} updateResult={current} />
       </PageHeaderWrapper>
     );
   }
 }
-export default Resource;
+export default MenuManage;

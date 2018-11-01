@@ -2,19 +2,18 @@ const dataSource = [
   {
     key: '1',
     name: '分享达人',
-    url: '/yzqc/mbe_communication/wechat_template/mbe_wechat_template_list',
+    url: '/system/menuManage',
     string: 'wechatPushConfig:*',
     visibleRange: '仅集团可见',
   },
   {
     key: '2',
     name: '分享达人',
-    url: '/yzqc/mbe_communication/wechat_template/mbe_wechat_template_list',
+    url: '/system/menuManage',
     string: 'wechatPushConfig:*',
     visibleRange: '仅集团可见',
   },
 ];
-
 
 const content = {
   name: "酷酷的",
