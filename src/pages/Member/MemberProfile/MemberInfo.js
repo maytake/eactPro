@@ -255,12 +255,13 @@ class MemberInfo extends PureComponent {
                     </FormItem>
                   </Col>
                   <Col {...this.colLayout}>
-                    <FormItem label="(多选)会员标签">
+                    <FormItem label="会员标签(多选)">
                       {getFieldDecorator('tag', {
                         initialValue: current.tag || undefined,
                       })(
                         <Select
                           mode="tags"
+                          placeholder="请选择会员标签(多选)"
                           showSearch
                         >
                           {getTagsOption()}
