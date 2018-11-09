@@ -1,5 +1,4 @@
 import React, { PureComponent } from 'react';
-import { connect } from 'dva';
 import { Input, Modal, Form, Select, Row, Col } from 'antd';
 import isEqual from 'lodash/isEqual';
 import TableForm from './TableForm';
@@ -34,8 +33,8 @@ class AddResource extends PureComponent {
   }
 
   static getDerivedStateFromProps(nextProps, preState) {
-    console.log(nextProps);
-    console.log(preState);
+    // console.log(nextProps);
+    // console.log(preState);
     if (isEqual(nextProps.updateResult, preState.data)) {
       return null;
     }
@@ -47,46 +46,44 @@ class AddResource extends PureComponent {
   render() {
     const {
       form: { getFieldDecorator },
+      category,
     } = this.props;
     const {data} = this.state;
-    const current=data.content?data.content:{};
+    const current=data.data?data.data:{};
+    const id=current.id;
     console.log(current);
     const { modalVisible, form, handleAdd, handleModalVisible } = this.props;
+    const checkPermission = (rule, value, callback) => {
+      const pass =/^\w+(:)\*$/.test(value);
+      if (!value) {
+        callback('请输入权限字符串！');
+      }else if (!pass) {
+          callback('权限编码值不合法，必须以冒号加星号结尾！正确例如permission:*');
+        } else {
+          callback();
+        }
+    };
     const okHandle = () => {
       form.validateFields((err, fieldsValue) => {
         console.log(fieldsValue);
         if (err) return;
         form.resetFields();
-        handleAdd(fieldsValue);
+        let spliceData;
+        if(id){
+           spliceData={
+            ts:current.ts,
+            funcType:current.funcType,
+            ...fieldsValue,
+          };
+        }else{
+          spliceData=fieldsValue;
+        }
+        handleAdd(spliceData,id);
       });
     };
 
     // 可见范围
-    const scopeList = [
-      {
-        pkParentfunc: 150,
-        dr: 1,
-        parentfuncname: '系统管理',
-        ts: '2015-10-9 20:00:27 ',
-        code: '01',
-      },
-      {
-        pkParentfunc: 151,
-        dr: 1,
-        parentfuncname: '基础数据',
-        ts: '2015-10-9 20:00:35 ',
-        code: '02',
-      },
-      {
-        pkParentfunc: 152,
-        dr: 1,
-        parentfuncname: '组织管理',
-        ts: '2015-10-9 20:00:46 ',
-        code: '03',
-      },
-    ];
-
- 
+    const scopeList =category || [];
 
     const getModalContent = () => {
       return (
@@ -94,9 +91,9 @@ class AddResource extends PureComponent {
           <Row gutter={24}>
             <Col {...this.colLayout}>
               <FormItem label="名称" {...this.formLayout}>
-                {getFieldDecorator('name', {
+                {getFieldDecorator('funcName', {
                   rules: [{ required: true, message: '请输入名称' }],
-                  initialValue: current.name,
+                  initialValue: current.funcName,
                 })(<Input placeholder="请输入名称" />)}
               </FormItem>
             </Col>
@@ -111,9 +108,9 @@ class AddResource extends PureComponent {
           <Row gutter={24}>
             <Col {...this.colLayout}>
               <FormItem label="类别" {...this.formLayout}>
-                {getFieldDecorator('category', {
+                {getFieldDecorator('parentId', {
                   rules: [{ required: true, message: '请选择类别' }],
-                  initialValue: current.category,
+                  initialValue: current.parentId,
                 })(
                   <Select
                     showSearch
@@ -124,7 +121,7 @@ class AddResource extends PureComponent {
                     placeholder="请选择类别"
                   >
                     {scopeList.map(item => (
-                      <SelectOption key={item.pkParentfunc} value={item.pkParentfunc}>
+                      <SelectOption key={item.pkParentfunc} value={item.pkParentfunc.toString()}>
                         {item.parentfuncname}
                       </SelectOption>
                     ))}
@@ -134,19 +131,20 @@ class AddResource extends PureComponent {
             </Col>
             <Col {...this.colLayout}>
               <FormItem label="权限字符串" {...this.formLayout}>
-                {getFieldDecorator('permission', {
-                  rules: [{ required: true, message: '请输入权限字符串' }],
-                  initialValue: current.permission,
-                })(<Input placeholder="请输入权限字符串" />)}
+                {getFieldDecorator('funcCode', {
+                  rules: [{ required: true, message: '请输入权限字符串,例如permission:*' },{validator: checkPermission, }],
+                  
+                  initialValue: current.funcCode,
+                })(<Input placeholder="请输入权限字符串,例如permission:*" />)}
               </FormItem>
             </Col>
           </Row>
           <Row gutter={24}>
             <Col {...this.colLayout}>
               <FormItem label="可见范围" {...this.formLayout}>
-                {getFieldDecorator('visibleRange', {
+                {getFieldDecorator('visible_scope', {
                   rules: [{ required: true, message: '请选择可见范围' }],
-                  initialValue: current.visibleRange,
+                  initialValue: current.visible_scope&&current.visible_scope.toString(),
                 })(
                   <Select placeholder="请选择可见范围">
                     <SelectOption value="1">仅集团可见</SelectOption>
@@ -157,20 +155,21 @@ class AddResource extends PureComponent {
             </Col>
             <Col {...this.colLayout}>
               <FormItem label="URL路径" {...this.formLayout}>
-                {getFieldDecorator('urlPath', {
+                {getFieldDecorator('funcUrl', {
                   rules: [{ required: true, message: '请输入URL路径' }],
-                  initialValue: current.urlPath,
+                  initialValue: current.funcUrl,
                 })(<Input placeholder="请输入URL路径" />)}
               </FormItem>
             </Col>
           </Row>
           <Row gutter={24}>
             <FormItem label="按钮明细" {...this.tableLayout}>
-              {getFieldDecorator('members', {
-                initialValue: current.members,
+              {getFieldDecorator('children', {
+                initialValue: current.children,
               })(<TableForm />)}
             </FormItem>
           </Row>
+
         </Form>
       );
     };

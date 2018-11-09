@@ -1,46 +1,46 @@
-import { routerRedux } from 'dva/router';
+import router from 'umi/router';
 import { message } from 'antd';
-import { fakeSubmitForm } from '@/services/api';
-
+import { changePassword } from '@/services/getApi';
+import { reloadAuthorized } from '@/utils/Authorized';
+import { setAuthority } from '@/utils/authority';
 export default {
   namespace: 'changepassword',
 
   state: {
-    step: {
-      payAccount: 'ant-design@alipay.com',
-      receiverAccount: 'test@example.com',
-      receiverName: 'Alex',
-      amount: '500',
-    },
+    status: undefined,
   },
 
   effects: {
-    *submitRegularForm({ payload }, { call }) {
-      yield call(fakeSubmitForm, payload);
-      message.success('提交成功');
-    },
-    *submitStepForm({ payload }, { call, put }) {
-      yield call(fakeSubmitForm, payload);
+    *submitRegularForm({ payload }, { call, put }) { 
       yield put({
-        type: 'saveStepFormData',
-        payload,
+        type: 'changeLoginStatus',
+        payload: {
+          status: false,
+          currentAuthority: 'guest',
+        },
       });
-      yield put(routerRedux.push('/form/step-form/result'));
+      const response =yield call(changePassword, payload);
+      if(response&&response.errCode === 0){
+        message.success('提交成功');
+        localStorage.removeItem('userToken');
+        reloadAuthorized();
+        router.push({
+          pathname: '/user/login',
+        })
+      
+      }else{
+        message.error(response.errMsg);
+      }
     },
-    *submitAdvancedForm({ payload }, { call }) {
-      yield call(fakeSubmitForm, payload);
-      message.success('提交成功');
-    },
+
   },
 
   reducers: {
-    saveStepFormData(state, { payload }) {
+    changeLoginStatus(state, { payload }) {
+      setAuthority(payload.currentAuthority);
       return {
         ...state,
-        step: {
-          ...state.step,
-          ...payload,
-        },
+        status: payload.status,
       };
     },
   },

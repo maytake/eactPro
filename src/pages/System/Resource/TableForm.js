@@ -1,8 +1,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import { Table, Button, Input,Select, message, Popconfirm, Divider } from 'antd';
 import isEqual from 'lodash/isEqual';
-import styles from './AddResource.less';
-const Option = Select.Option;
+
 class TableForm extends PureComponent {
     index = 0;
 
@@ -56,9 +55,8 @@ class TableForm extends PureComponent {
         const newData = data.map(item => ({ ...item }));
         const item = {
             key: `NEW_ID_${this.index}`,
-            type:'',
-            name: '',
-            permission: ''
+            activityCode:'',
+            activityName:'',
         };
         this.index += 1;
         newData.push(item);
@@ -77,40 +75,25 @@ class TableForm extends PureComponent {
     render() {
         const { loading, data } = this.state;
         const columns = [
-            {
-                title: '选择类型',
-                dataIndex: 'type',
-                key: 'type',
-                render: (text, record) => (
-                    <Select 
-                        defaultValue="lucy" 
-                        onChange={e => this.handleFieldChange(e, 'type', record.key)}
-                    >
-                        <Option value="jack">Jack</Option>
-                        <Option value="lucy">Lucy</Option>
-                        <Option value="Yiminghe">yiminghe</Option>
-                    </Select>
-
-                ),
-            },{
+        {
             title: '按钮名称',
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'activityName',
+            key: 'activityName',
             render: (text, record) => (
                 <Input 
                 value={text}
-                onChange={e => this.handleFieldChange(e, 'name', record.key)}
+                onChange={e => this.handleFieldChange(e, 'activityName', record.key)}
                 placeholder="请输入按钮名称" 
                 />
             ),
         }, {
             title: '按钮权限字符串 ',
-            dataIndex: 'permission',
-            key: 'permission',
+            dataIndex: 'activityCode',
+            key: 'activityCode',
             render: (text, record) => (
                 <Input 
                 value={text}
-                onChange={e => this.handleFieldChange(e, 'permission', record.key)}
+                onChange={e => this.handleFieldChange(e, 'activityCode', record.key)}
                 placeholder="请输入按钮权限字符串"
                 />
             ),

@@ -4,6 +4,7 @@ import router from 'umi/router';
 import hash from 'hash.js';
 import MD5 from 'js-md5';
 import { isAntdPro } from './utils';
+import { async } from './../services/getApi';
 
 const codeMessage = {
   200: '服务器成功返回请求的数据。',
@@ -119,14 +120,14 @@ export default function request(
       const ts = new Date().getTime().toString();
       const content =JSON.stringify(newOptions.body);
       let sign;
-      if(Object.keys(newOptions.body).length!==0){
+      if(newOptions.body&&Object.keys(newOptions.body).length!==0){
          sign = MD5(`content=${  content  }&nonce=${ nonce   }&signMethod=MD5&ts=${  ts  }&type=crm3&version=3.0&SECRET=AD7061F216EC445083C921D7EDD85DEF`).toLowerCase();
       }else{
-         sign = MD5(`nonce=${ nonce   }&signMethod=MD5&ts=${  ts  }&type=crm3&version=3.0&SECRET=AD7061F216EC445083C921D7EDD85DEF`).toLowerCase();
+         sign = MD5(`nonce=${ nonce }&signMethod=MD5&ts=${  ts  }&type=crm3&version=3.0&SECRET=AD7061F216EC445083C921D7EDD85DEF`).toLowerCase();
       } 
 
       const signParam = {
-        "content":Object.keys(newOptions.body).length!==0?content:'',
+        "content":newOptions.body&&Object.keys(newOptions.body).length!==0?content:'',
         "ts": ts,
         "signMethod": "MD5",
         "type": "crm3",
@@ -163,13 +164,13 @@ export default function request(
   }
   return fetch(url, newOptions)
     .then(checkStatus)
-    .then(response => cachedSave(response, hashcode))// 记录缓存
+    // .then(response => cachedSave(response, hashcode))// 记录缓存
     .then(response => {
       // DELETE and 204 do not return data by default
-      // using .json will report an error.
       if (newOptions.method === 'DELETE' || response.status === 204) {
         return response.text();
-      }
+      };
+ 
       return response.json();
     })
     .catch(e => {

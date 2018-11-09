@@ -1,55 +1,75 @@
 import { stringify } from 'qs';
 import request from '@/utils/request';
+import router from 'umi/router';
+import { Modal } from 'antd';
 
-// test
-export async function Login(params) {
-  return request('/CRM/mbe3/mgrParentFunc/page.json', {
+// judgeExpire
+const postData=async (url, params)=>{
+  const res=request(url, {
     method: 'POST',
     body: {
       ...params,
     },
   });
+  const judgeExpire = await res;
+  if(judgeExpire&&judgeExpire.errCode===1){
+    Modal.info({
+      title: '用户信息已过期，请返回登录',
+      onOk() {
+        router.push('/user/login');
+      },
+    });
+  }
+  return res;
 }
+
 
 
 // resource
 export async function Resource(params) {
-  return request(`/api/Resource?${stringify(params)}`);
+  return postData('/CRM/mbe3/mgrFunction/page.json', params);
 }
 
 export async function RemoveResource(params) {
-  return request(`/api/RomoveResource?${stringify(params)}`);
+  return postData('/CRM/mbe3/mgrFunction/delete.json', params);
 }
 
 export async function AddResource(params) {
-  return request('/api/AddResource', {
-    method: 'POST',
-    body: {
-      ...params,
-    },
-  });
+  return postData('/CRM/mbe3/mgrFunction/save.json', params);
+
+}
+
+export async function resourceToUpdate(params) {
+  return postData('/CRM/mbe3/mgrFunction/toUpdate.json', params);
+
+}
+
+export async function resourceUpdate(params) {
+  return postData('/CRM/mbe3/mgrFunction/update.json', params);
+}
+
+export async function resourceCategory(params) {
+  return postData('/CRM/mbe3/mgrParentFunc/cateList.json', params);
+
 }
 
 // MenuManage
 export async function MenuManage(params) {
-  return request(`/api/MenuManage?${stringify(params)}`);
+  return postData('/CRM/mbe3/mgrParentFunc/page.json', params);
+
 }
 
 export async function RomoveMenu(params) {
-  return request(`/api/RomoveMenu?${stringify(params)}`);
+  return postData('/CRM/mbe3/mgrParentFunc/delete.json', params);
+
 }
 
 export async function getMenuUpdate(params) {
-  return request(`/api/getMenuUpdate?${stringify(params)}`);
+  return postData('/CRM/mbe3/mgrParentFunc/update.json', params);
 }
 
 export async function AddMenu(params) {
-  return request('/api/AddMenu', {
-    method: 'POST',
-    body: {
-      ...params,
-    },
-  });
+  return postData('/CRM/mbe3/mgrParentFunc/save.json', params);
 }
 
 // home
@@ -107,4 +127,21 @@ export async function RemoveRoleList(params) {
 
 export async function getRoleUpdate(params) {
   return request(`/api/getRoleUpdate?${stringify(params)}`);
+}
+
+
+// change password
+export async function changePassword(params) {
+  return postData('/CRM/mbe3/mgrLogin/updatePwd.json', params);
+}
+
+// LoginIn
+export async function LoginIn(params) {
+  return postData('/CRM/mbe3/mgrLogin/userLogin.json', params);
+
+}
+
+// LoginOut
+export async function LoginOut(params) {
+  return postData('/CRM/mbe3/mgrLogin/userLogout.json', params);
 }

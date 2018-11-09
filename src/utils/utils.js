@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import moment from 'moment';
 import React from 'react';
 import nzh from 'nzh/cn';
@@ -181,3 +182,18 @@ export function formatWan(val) {
 export function isAntdPro() {
   return window.location.hostname === 'preview.pro.ant.design';
 }
+
+export function AddKey(dataList, keyVal){
+  if(dataList&&dataList.length!==0){
+    const hasBarProperty = hasOwnProperty.call(dataList[0], "key");
+    if(!hasBarProperty){
+      const data= dataList.map(item=>{
+        item.key=item[keyVal];
+        return item;
+      });
+      return data;
+    }
+  }
+  return dataList;
+};
+

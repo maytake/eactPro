@@ -1,46 +1,90 @@
-import { Resource, AddResource, getUserUpdate, RemoveResource } from '@/services/getApi';
-
+import { Resource, AddResource, resourceCategory, resourceToUpdate, resourceUpdate, RemoveResource } from '@/services/getApi';
+import { message } from 'antd';
 export default {
   namespace: 'resource',
 
   state: {
-    updateResult:{},
+    updateResult: {},
     dataSource: [],
     addResult: {},
     reomveResult: {},
+    category: {},
   },
 
   effects: {
     *fetchResource({ payload }, { call, put }) {
       const response = yield call(Resource, payload);
-      yield put({
-        type: 'queryList',
-        payload: response,
-      });
+      if (response&&response.errCode === 0) {
+        yield put({
+          type: 'queryList',
+          payload: response,
+        });
+      } else {
+        message.error(response.errMsg);
+      }
     },
     *getUpdate({ payload, callback }, { call, put }) {
-      const response = yield call(getUserUpdate, payload);
-      yield put({
-        type: 'getUpdateList',
-        payload: response,
-      });
-      if (callback) callback(response);
+      const response = yield call(resourceUpdate, payload);
+      if (response&&response.errCode === 0) {
+        yield put({
+          type: 'getUpdateList',
+          payload: response,
+        });
+        message.success('编辑成功');
+        if (callback) callback(response);
+      } else {
+        message.error(response.errMsg);
+      }
+    },
+    *resourceToUpdate({ payload, callback }, { call, put }) {
+      const response = yield call(resourceToUpdate, payload);
+      if (response&&response.errCode === 0) {
+        yield put({
+          type: 'getUpdateList',
+          payload: response,
+        });
+        if (callback) callback(response);
+      } else {
+        message.error(response.errMsg);
+      }
+    },
+    *getCategory({ payload, callback }, { call, put }) {
+      const response = yield call(resourceCategory, payload);
+      if (response&&response.errCode === 0) {
+        yield put({
+          type: 'category',
+          payload: response,
+        });
+        if (callback) callback(response);
+      } else {
+        message.error(response.errMsg);
+      }
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(AddResource, payload);
-      yield put({
-        type: 'addList',
-        payload: response,
-      });
-      if (callback) callback();
+      if (response&&response.errCode === 0) {
+        yield put({
+          type: 'addList',
+          payload: response,
+        });
+        message.success('添加成功');
+        if (callback) callback();
+      } else {
+        message.error(response.errMsg);
+      }
     },
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(RemoveResource, payload);
-      yield put({
-        type: 'removeList',
-        payload: response,
-      });
-      if (callback) callback();
+      if (response&&response.errCode === 0) {
+        yield put({
+          type: 'removeList',
+          payload: response,
+        });
+        message.success('删除成功');
+        if (callback) callback();
+      } else {
+        message.error(response.errMsg);
+      }
     },
   },
 
@@ -48,7 +92,7 @@ export default {
     queryList(state, { payload }) {
       return {
         ...state,
-        dataSource: payload,
+        dataSource: payload.data,
       };
     },
     getUpdateList(state, { payload }) {
@@ -67,6 +111,12 @@ export default {
       return {
         ...state,
         reomveResult: payload,
+      };
+    },
+    category(state, { payload }) {
+      return {
+        ...state,
+        category: payload,
       };
     },
   },

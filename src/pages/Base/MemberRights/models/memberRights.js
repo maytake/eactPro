@@ -1,5 +1,5 @@
 
-import { Login } from '@/services/getApi';
+import { LoginOut } from '@/services/getApi';
 
 export default {
   namespace: 'memberRights',
@@ -10,7 +10,7 @@ export default {
 
   effects: {
     *fetchData({ payload }, { call, put }) {
-      const response = yield call(Login,payload);
+      const response = yield call(LoginOut,payload);
       yield put({
         type: 'show',
         payload: response

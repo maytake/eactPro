@@ -15,7 +15,6 @@ export default [
     path: '/',
     component: '../layouts/BasicLayout',
     Routes: ['src/pages/Authorized'],
-    authority: ['admin', 'user'],
     routes: [
       // dashboard
       { path: '/', redirect: '/system/updateInfo' },
@@ -122,12 +121,17 @@ export default [
             routes: [
               {
                 path: '/member/memberProfile/addMember',
-                redirect: '/member/memberProfile/addMember/MemberInfo',
+                redirect: '/member/memberProfile/addMember/memberInfo',
               },
               {
-                path: '/member/memberProfile/addMember/MemberInfo',
+                path: '/member/memberProfile/addMember/memberInfo',
                 name: '会员信息',
                 component: './member/MemberProfile/MemberInfo',
+              },
+              {
+                path: '/member/memberProfile/addMember/becomeMember',
+                name: '会员信息',
+                component: './member/MemberProfile/JoinMember',
               },
             ],
           },

@@ -1,6 +1,7 @@
 import { routerRedux } from 'dva/router';
 import { stringify } from 'qs';
-import { fakeAccountLogin, getFakeCaptcha } from '@/services/api';
+import { LoginIn, LoginOut } from '@/services/getApi';
+import { message } from 'antd';
 import { setAuthority } from '@/utils/authority';
 import { getPageQuery } from '@/utils/utils';
 import { reloadAuthorized } from '@/utils/Authorized';
@@ -14,13 +15,13 @@ export default {
 
   effects: {
     *login({ payload }, { call, put }) {
-      const response = yield call(fakeAccountLogin, payload);
+      const response = yield call(LoginIn, payload);
       yield put({
         type: 'changeLoginStatus',
         payload:{...response, currentAuthority: 'admin',} ,
       });
       // Login successfully
-      if (response.errCode === 0) {
+      if (response&&response.errCode === 0) {
         localStorage.setItem('userToken',response.userToken);
         reloadAuthorized();
         const urlParams = new URL(window.location.href);
@@ -39,14 +40,14 @@ export default {
           }
         }
         yield put(routerRedux.replace(redirect || '/'));
+      }else{
+        message.success(response.errMsg);
       }
     },
 
-    *getCaptcha({ payload }, { call }) {
-      yield call(getFakeCaptcha, payload);
-    },
 
-    *logout(_, { put }) {
+    *logout({ payload }, {call, put }) {
+      const response = yield call(LoginOut, payload);
       yield put({
         type: 'changeLoginStatus',
         payload: {
@@ -54,16 +55,20 @@ export default {
           currentAuthority: 'guest',
         },
       });
-      localStorage.removeItem('userToken');
-      reloadAuthorized();
-      yield put(
-        routerRedux.push({
-          pathname: '/user/login',
-          search: stringify({
-            redirect: window.location.href,
-          }),
-        })
-      );
+      if (response&&response.errCode === 0) {
+        localStorage.removeItem('userToken');
+        reloadAuthorized();
+        yield put(
+          routerRedux.push({
+            pathname: '/user/login',
+            search: stringify({
+              redirect: window.location.href,
+            }),
+          })
+        );
+      }else{
+        message.success(response.errMsg);
+      }
     },
   },
 

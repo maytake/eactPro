@@ -1,5 +1,5 @@
 import { MenuManage, AddMenu, getMenuUpdate, RomoveMenu } from '@/services/getApi';
-
+import { message } from 'antd';
 export default {
   namespace: 'menuManage',
 
@@ -13,34 +13,53 @@ export default {
   effects: {
     *fetchData({ payload }, { call, put }) {
       const response = yield call(MenuManage, payload);
-      yield put({
-        type: 'queryList',
-        payload: response,
-      });
+      if(response&&response.errCode===0){
+        yield put({
+          type: 'queryList',
+          payload: response,
+        });
+      }else{
+        message.error(response.errMsg);
+      }
     },
     *getUpdate({ payload, callback }, { call, put }) {
       const response = yield call(getMenuUpdate, payload);
-      yield put({
-        type: 'getUpdateList',
-        payload: response,
-      });
-      if (callback) callback(response);
+      if(response&&response.errCode===0){
+        yield put({
+          type: 'getUpdateList',
+          payload: response,
+        });
+        message.success('编辑成功');
+        if (callback) callback(response);
+      }else{
+        message.error(response.errMsg);
+      }
     },
     *add({ payload, callback }, { call, put }) {
       const response = yield call(AddMenu, payload);
-      yield put({
-        type: 'addList',
-        payload: response,
-      });
-      if (callback) callback();
+      if(response&&response.errCode===0){
+        yield put({
+          type: 'addList',
+          payload: response,
+        });
+        message.success('添加成功');
+        if (callback) callback(response);
+      }else{
+        message.error(response.errMsg);
+      }
     },
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(RomoveMenu, payload);
-      yield put({
-        type: 'removeList',
-        payload: response,
-      });
-      if (callback) callback();
+      if(response&&response.errCode===0){
+        yield put({
+          type: 'removeList',
+          payload: response,
+        });
+        message.success('删除成功');
+        if (callback) callback(response);
+      }else{
+        message.error(response.errMsg);
+      }
     },
   },
 
@@ -48,7 +67,7 @@ export default {
     queryList(state, { payload }) {
       return {
         ...state,
-        data: payload,
+        data: payload.data,
       };
     },
     getUpdateList(state, { payload }) {

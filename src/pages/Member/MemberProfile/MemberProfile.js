@@ -2,15 +2,16 @@ import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
 import router from 'umi/router';
 import { Row, Col, Card, Form, Input, Button, Select, Modal, message, Table, Tooltip, Divider, DatePicker } from 'antd';
+import { AddKey } from '@/utils/utils';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './MemberProfile.less';
 const FormItem = Form.Item;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
-@connect(({ role, loading }) => ({
-  role,
-  loadings: loading.effects['role/fetchBasic'],
+@connect(({ memberProfile, loading }) => ({
+  memberProfile,
+  loading: loading.effects['memberProfile/fetchData'],
 }))
 @Form.create()
 class MemberProfile extends PureComponent {
@@ -19,63 +20,190 @@ class MemberProfile extends PureComponent {
     lg: 8,
     sm: 24,
   };
-
-  state = {
-    modalVisible: false,
+  
+  formItemLayout = {
+    labelCol: {
+      xs: { span: 24 },
+      sm: { span: 6 },
+    },
+    wrapperCol: {
+      xs: { span: 24 },
+      sm: { span: 18 },
+    },
   };
 
-  componentDidMount() {
-    const { dispatch } = this.props;
-    dispatch({
-      type: 'userManagement/fetchBasic',
-    });
+  constructor(props) {
+    super(props);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = {
+      loading: false,
+      current:{},
+    };
   }
 
-  handleModalVisible = flag => {
-    this.setState({
-      modalVisible: !!flag,
+  componentDidMount() {
+    this.getData();
+  };
+
+  getData(params){
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'memberProfile/fetchData',
+      payload: {
+        page: "1",
+        pageSize : "20",
+        sortType: "auto",
+        sel:"starttime",
+        grade:"auto",
+        starttime:"auto"
+        },
+    });
+  };
+  
+  handleTableChange = (pagination, filters, sorter) => {
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'memberProfile/fetchData',
+      payload: {
+        page: pagination.current,
+        pageSize : pagination.pageSize,
+        sortType: "auto",
+        sel:"starttime",
+        grade:"auto",
+        starttime:"auto"
+        },
     });
   };
 
   handleAdd = fields => {
     message.success(fields.desc);
-    this.handleModalVisible();
   };
 
+  
+  handleSubmit(e) {
+    e.preventDefault();
+    const { dispatch, form } = this.props;
+    form.validateFields((err, fieldsValue) => {
+      console.log(fieldsValue)
+      const rangeValue = fieldsValue.time;
+      if (err) return;
+      dispatch({
+        type: 'memberProfile/fetchData',
+        payload: {
+          page: 1,
+          pageSize : 20,
+          sortType: "auto",
+          sel:"starttime",
+          grade:"auto",
+          starttime:"auto",
+          ...fieldsValue,
+          firstStartTime:rangeValue&&rangeValue[0].format('YYYY-MM-DD'),
+          firstEndTime:rangeValue&&rangeValue[1].format('YYYY-MM-DD'),
+          },
+      });
+      
+    });
+  }
+  
   deleteItem(id) {
-    message.success('This is a message of success ');
-    console.log(id);
+    const { dispatch } = this.props;
+    dispatch({
+      type: 'memberProfile/remove',
+      payload: {
+        pkMembermgcust:id,
+      },
+      callback:()=>{
+        this.getData();
+      }
+    });
+    
   }
 
   Add() {
-    router.push('/member/memberProfile/addMember')
+    router.push('/member/memberProfile/addMember/memberInfo')
   }
 
+  Edit(id){
+    router.push({
+      pathname: '/member/memberProfile/addMember/memberInfo',
+      query:{id}
+    });
+  }
 
+  SwitchStatus(key, status, id){
+    const { dispatch } = this.props;
+    if(status!==2){
+      dispatch({
+        type: 'memberProfile/stop',
+        payload: {
+          pkMembermgcust:id,
+        },
+        callback:()=>{
+          this.getData();
+        }
+      });
+    }else{
+      dispatch({
+        type: 'memberProfile/start',
+        payload: {
+          pkMembermgcust:id,
+        },
+        callback:()=>{
+          this.getData();
+        }
+      });
+    }
+
+  };
+
+  BatchSwitchStatus(status){
+    const { dispatch } = this.props;
+    const { selectedRows } = this.state;
+    dispatch({
+      type: `memberProfile/${status}`,
+      payload: {
+        pkMembermgcust:selectedRows,
+      },
+      callback:()=>{
+        this.getData();
+      }
+    });
+  }
+
+  BatchStopStatus(){
+    const { dispatch } = this.props;
+    const { selectedRows } = this.state;
+    dispatch({
+      type: 'memberProfile/batchStop',
+      payload: {
+        pkMembermgcust:selectedRows,
+      },
+      callback:()=>{
+        this.getData();
+      }
+    });
+  }
 
   render() {
-    const { modalVisible } = this.state;
-    const formItemLayout = {
-      labelCol: {
-        xs: { span: 24 },
-        sm: { span: 6 },
-      },
-      wrapperCol: {
-        xs: { span: 24 },
-        sm: { span: 18 },
-      },
+ 
+    const { getFieldDecorator } = this.props.form;
+    const {
+      loading,
+      memberProfile: { dataSource},
+    } = this.props;
+    
+    const { content, totalElements, size }=dataSource;
+   
+    let resData;
+    if(Object.keys(dataSource).length!==0){
+      resData= AddKey(content, 'pkMembermgcust'); 
     };
-    const { getFieldDecorator, history } = this.props.form;
     const paginationProps = {
       showSizeChanger: true,
       showQuickJumper: true,
-      defaultCurrent: 2,
-      total: 100,
-      pageSize: 10,
-    };
-
-    const SwitchStatus = (key, status, id) => {
-      message.success(status);
+      defaultCurrent: 1,
+      total: totalElements,
+      pageSize: size,
     };
 
     const Delete = (key, currentId) => {
@@ -87,39 +215,12 @@ class MemberProfile extends PureComponent {
         onOk: () => this.deleteItem(currentId),
       });
     };
-    const dataSource = [
-      {
-        serialNumber: '1',
-        name: '王莹莹',
-        code: 'HYBM20181014028867',
-        phone: '150****2128',
-        Level: '银卡',
-        IDNo: '35260119800413002X',
-        carNumber: '闽D7023Q',
-        VIN: 'LFV2A21K9D4251687',
-        time: '2018-10-14',
-        shop: '厦门致远',
-      }, {
-        serialNumber: '2',
-        name: '王莹莹',
-        code: 'HYBM20181014028867',
-        phone: '150****2128',
-        Level: '银卡',
-        IDNo: '35260119800413002X',
-        carNumber: '闽D7023Q',
-        VIN: 'LFV2A21K9D4251687',
-        time: '2018-10-14',
-        shop: '厦门致远',
-      },
-
-
-    ];
 
     const columns = [
       {
         title: '序号',
-        dataIndex: 'serialNumber',
-        key: 'serialNumber',
+        dataIndex: 'rn',
+        key: 'rn',
       },
       {
         title: '会员姓名',
@@ -128,50 +229,51 @@ class MemberProfile extends PureComponent {
       },
       {
         title: '会员编码',
-        dataIndex: 'code',
-        key: 'code',
+        dataIndex: 'membercode',
+        key: 'membercode',
       },
       {
         title: '电话',
-        dataIndex: 'phone',
-        key: 'phone',
+        dataIndex: 'mobilephone',
+        key: 'mobilephone',
       },
       {
         title: '等级',
-        dataIndex: 'Level',
-        key: 'Level',
+        dataIndex: 'gradename',
+        key: 'gradename',
       },
       {
         title: '证件号',
-        dataIndex: 'IDNo',
-        key: 'IDNo',
+        dataIndex: 'paperscode',
+        key: 'paperscode',
       },
       {
         title: '车牌号',
-        dataIndex: 'carNumber',
-        key: 'carNumber',
+        dataIndex: 'licenseplate',
+        key: 'licenseplate',
       },
       {
         title: '车架号',
-        dataIndex: 'VIN',
-        key: 'VIN',
+        dataIndex: 'carframeno',
+        key: 'carframeno',
       },
       {
         title: '入会日期',
-        dataIndex: 'time',
-        key: 'time',
+        dataIndex: 'firstStartTime',
+        key: 'firstStartTime',
       },
       {
         title: '入会4S店',
-        dataIndex: 'shop',
-        key: 'shop',
+        dataIndex: 'foursname',
+        key: 'foursname',
       },
       {
         title: '状态',
-        dataIndex: 'status',
-        key: 'status',
+        dataIndex: 'vstatus',
+        key: 'vstatus',
         render: text => {
-          return text === '1' ? '启用' : '停用';
+          // eslint-disable-next-line no-nested-ternary
+          return text === 1 ?'启用': text === 2?'停用':'未启用' ;
         },
       },
       {
@@ -180,13 +282,13 @@ class MemberProfile extends PureComponent {
         key: 'action',
         width: 155,
         render: (text, record) => {
-          const start = record.status === '1';
+          const canstop = record.vstatus !== 2;
           return (
             <Fragment>
-              <Tooltip title={start ? '启用' : '停用'}>
+              <Tooltip title={canstop ? '停用' : '启用'}>
                 <Button
-                  icon={start ? 'play-circle' : 'pause-circle'}
-                  onClick={({ key }) => SwitchStatus(key, record.status, record.key)}
+                  icon={canstop ? 'pause-circle' : 'play-circle'}
+                  onClick={({ key }) => this.SwitchStatus(key, record.vstatus, record.pkMembermgcust)}
                   type="primary"
                   style={{ marginRight: '8px' }}
                 />
@@ -194,7 +296,7 @@ class MemberProfile extends PureComponent {
               <Tooltip title="编辑">
                 <Button
                   icon="edit"
-                  onClick={() => this.handleModalVisible(true)}
+                  onClick={() => this.Edit(record.pkMembermgcust)}
                   type="primary"
                   style={{ marginRight: '8px' }}
                 />
@@ -202,7 +304,7 @@ class MemberProfile extends PureComponent {
               <Tooltip title="删除">
                 <Button
                   icon="delete"
-                  onClick={({ key }) => Delete(key, record.key)}
+                  onClick={({ key }) => Delete(key, record.pkMembermgcust)}
                   type="primary"
                 />
               </Tooltip>
@@ -213,7 +315,9 @@ class MemberProfile extends PureComponent {
     ];
     const rowSelection = {
       onChange: (selectedRowKeys, selectedRows) => {
-        console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
+        this.setState({
+          selectedRows: selectedRowKeys,
+        });
       }
     };
 
@@ -226,29 +330,29 @@ class MemberProfile extends PureComponent {
 
               <Row gutter={24}>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='姓名：'>
+                  <FormItem {...this.formItemLayout} label='姓名：'>
                     {getFieldDecorator('name')(
                       <Input placeholder="请输入会员姓名" />
                     )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='电话：'>
-                    {getFieldDecorator('phone')(
+                  <FormItem {...this.formItemLayout} label='电话：'>
+                    {getFieldDecorator('mobilephone')(
                       <Input type="text" placeholder="请输入会员手机号" />
                     )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='会员编码：'>
-                    {getFieldDecorator('code')(
+                  <FormItem {...this.formItemLayout} label='会员编码：'>
+                    {getFieldDecorator('membercode')(
                       <Input type="text" placeholder="请输入会员编码" />
                     )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='微信号：'>
-                    {getFieldDecorator('wechat')(
+                  <FormItem {...this.formItemLayout} label='微信号：'>
+                    {getFieldDecorator('openId')(
                       <Input type="text" placeholder="请输入会员微信OPENID" />
                     )}
                   </FormItem>
@@ -256,26 +360,27 @@ class MemberProfile extends PureComponent {
               </Row>
               <Row gutter={24}>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='车牌：'>
-                    {getFieldDecorator('carNumber')(
+                  <FormItem {...this.formItemLayout} label='车牌：'>
+                    {getFieldDecorator('licenseplate')(
                       <Input placeholder="请输入车牌号码" />
                     )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='车架：'>
-                    {getFieldDecorator('VIN')(
+                  <FormItem {...this.formItemLayout} label='车架：'>
+                    {getFieldDecorator('carframe')(
                       <Input type="text" placeholder="请输入车架号" />
                     )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='会员等级：'>
-                    {getFieldDecorator('level')(
+                  <FormItem {...this.formItemLayout} label='会员等级：'>
+                    {getFieldDecorator('grades')(
                       <Select
                         placeholder="请选择会员等级"
                         onChange={this.handleSelectChange}
                       >
+                        <Option value="undefined">请选择会员等级</Option>
                         <Option value="251">普卡</Option>
                         <Option value="252">银卡</Option>
                         <Option value="253">金卡</Option>
@@ -287,12 +392,13 @@ class MemberProfile extends PureComponent {
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='4S店：'>
-                    {getFieldDecorator('shop')(
+                  <FormItem {...this.formItemLayout} label='4S店：'>
+                    {getFieldDecorator('foursshop')(
                       <Select
                         placeholder="请选择4S店"
                         onChange={this.handleSelectChange}
                       >
+                        <Option value="undefined">请选择4S店</Option>
                         <Option value="1">集团管理员</Option>
                         <Option value="2">集团业务员</Option>
                         <Option value="3">4S店管理员</Option>
@@ -303,22 +409,10 @@ class MemberProfile extends PureComponent {
                 </Col>
               </Row>
               <Row gutter={24}>
+    
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='标签：'>
-                    {getFieldDecorator('tags')(
-                      <Select
-                        placeholder="请选择标签"
-                        onChange={this.handleSelectChange}
-                      >
-                        <Option value="Y">启用</Option>
-                        <Option value="N">停用</Option>
-                      </Select>
-                    )}
-                  </FormItem>
-                </Col>
-                <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='状态：'>
-                    {getFieldDecorator('status')(
+                  <FormItem {...this.formItemLayout} label='状态：'>
+                    {getFieldDecorator('vstatus')(
                       <Select
                         placeholder="请选择状态"
                         onChange={this.handleSelectChange}
@@ -331,7 +425,7 @@ class MemberProfile extends PureComponent {
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
-                  <FormItem {...formItemLayout} label='入会时间：'>
+                  <FormItem {...this.formItemLayout} label='入会时间：'>
                     {getFieldDecorator('time')(<RangePicker style={{ width: '100%' }} placeholder={['开始日期', '结束日期']} />)}
                   </FormItem>
                  
@@ -365,20 +459,22 @@ class MemberProfile extends PureComponent {
                 <Button icon="upload" type="primary">
                   导出
                 </Button>
-                <Button type="primary">
+                <Button type="primary" onClick={()=>this.BatchSwitchStatus('batchStart')}>
                   批量启用
                 </Button>
-                <Button type="primary">
+                <Button type="primary" onClick={()=>this.BatchSwitchStatus('batchStop')}>
                   批量停用
                 </Button>
               </div>
             </div>
 
             <Table
+              loading={loading}
               rowSelection={rowSelection}
-              dataSource={dataSource}
+              dataSource={resData}
               pagination={paginationProps}
               columns={columns}
+              onChange={this.handleTableChange}
             />
           </div>
         </Card>

@@ -16,11 +16,7 @@ class MemberRights extends PureComponent {
     const { dispatch } = this.props;
     dispatch({
       type: 'memberRights/fetchData',
-      payload:{
-        page : 1,
-        pageSize : 10,
-        sortType : 'code',
-      }
+
     });
   }
 

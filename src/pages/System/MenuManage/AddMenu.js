@@ -32,8 +32,6 @@ class AddMenu extends PureComponent {
   }
 
   static getDerivedStateFromProps(nextProps, preState) {
-    console.log(nextProps);
-    console.log(preState);
     if (isEqual(nextProps.updateResult, preState.data)) {
       return null;
     }
@@ -47,27 +45,26 @@ class AddMenu extends PureComponent {
       form: { getFieldDecorator },
     } = this.props;
     const {data} = this.state;
-    const current=data.content?data.content:{};
-    console.log(current);
+    const id=data.pkParentfunc;
+    const current=data;
     const { modalVisible, form, handleAdd, handleModalVisible } = this.props;
     const okHandle = () => {
       form.validateFields((err, fieldsValue) => {
-        console.log(fieldsValue);
         if (err) return;
         form.resetFields();
-        handleAdd(fieldsValue);
+        handleAdd(fieldsValue,id);
       });
     };
 
     const getModalContent = () => {
       return (
-        <Form onSubmit={this.handleSubmit}>
+        <Form>
           <Row gutter={24}>
             <Col {...this.colLayout}>
               <FormItem label="名称" {...this.formLayout}>
-                {getFieldDecorator('name', {
+                {getFieldDecorator('parentfuncname', {
                   rules: [{ required: true, message: '请输入名称' }],
-                  initialValue: current.name,
+                  initialValue: current.parentfuncname,
                 })(<Input placeholder="请输入名称" />)}
               </FormItem>
             </Col>
@@ -92,9 +89,9 @@ class AddMenu extends PureComponent {
             </Col>
             <Col {...this.colLayout}>
               <FormItem label="URL路径" {...this.formLayout}>
-                {getFieldDecorator('urlPath', {
+                {getFieldDecorator('url', {
                   rules: [{ required: true, message: '请输入URL路径' }],
-                  initialValue: current.urlPath,
+                  initialValue: current.url,
                 })(<Input placeholder="请输入URL路径" />)}
               </FormItem>
             </Col>

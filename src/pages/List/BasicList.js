@@ -92,6 +92,7 @@ class BasicList extends PureComponent {
 
     setTimeout(() => this.addBtn.blur(), 0);
     form.validateFields((err, fieldsValue) => {
+      console.log(fieldsValue);
       if (err) return;
       this.setState({
         done: true,

@@ -3,6 +3,7 @@ import { connect } from 'dva';
 import moment from 'moment';
 import router from 'umi/router';
 import { Row, Col, Card, Form, Input, Button, Modal, message, Table, Tooltip } from 'antd';
+import { AddKey } from '@/utils/utils';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import AddMenu from './AddMenu';
 import styles from './MenuManage.less';
@@ -25,10 +26,20 @@ class MenuManage extends PureComponent {
     };
   }
 
+
   componentDidMount() {
+    this.getData();
+  }
+
+  getData(){
     const { dispatch } = this.props;
     dispatch({
       type: 'menuManage/fetchData',
+      payload: {
+        page: "1",
+        pageSize : "20",
+        sortType: "auto",
+        },
     });
   }
 
@@ -38,30 +49,54 @@ class MenuManage extends PureComponent {
     });
   };
 
-  handleAdd = fields => {
-    const {
-      dispatch,
-      menuManage: { addResult },
-    } = this.props;
-    dispatch({
-      type: 'menuManage/add',
-      payload: {
-        ...fields,
-      },
-    });
+  handleAdd = (fields, id)=> {
+    const { dispatch} = this.props;
+    if(id){
+      dispatch({
+        type: 'menuManage/getUpdate',
+        payload: {
+          pkParentfunc:id,
+          ...fields,
+        },
+        callback: () => {
+          this.getData();
+        }
+      });
+    }else{
+      dispatch({
+        type: 'menuManage/add',
+        payload: {
+          ...fields,
+        },
+        callback: () => {
+          this.getData();
+        }
+      });
+    }
+    this.handleModalVisible();
+  };
 
-    message.success(addResult.msg);
+  handleTableChange = (pagination, filters, sorter) => {
+    const { dispatch } = this.props;
     dispatch({
       type: 'menuManage/fetchData',
+      payload: {
+        page: pagination.current,
+        pageSize : pagination.pageSize,
+        sortType: "auto",
+        },
     });
-    this.handleModalVisible();
   };
 
   handleSearch(v) {
     const { dispatch } = this.props;
     dispatch({
       type: 'menuManage/fetchData',
-      payload: { name: v },
+      payload: {
+        page: "1",
+        pageSize : "20",
+        sortType: "auto",
+        name: v },
     });
     router.push({
       pathname: '/system/menuManage',
@@ -70,19 +105,15 @@ class MenuManage extends PureComponent {
   }
 
   deleteItem(id) {
-    const {
-      dispatch,
-      menuManage: { reomveResult },
-    } = this.props;
+    const { dispatch } = this.props;
     dispatch({
       type: 'menuManage/remove',
       payload: {
-        desc: id,
+        pkParentfunc: id,
       },
-    });
-    message.success(reomveResult.msg);
-    dispatch({
-      type: 'menuManage/fetchData',
+      callback: () => {
+        this.getData();
+      }
     });
   }
 
@@ -92,13 +123,16 @@ class MenuManage extends PureComponent {
       loading,
       menuManage: { data },
     } = this.props;
-    
-    const { list, pagination }=data;
-    if(!pagination){return null;}
+    if(Object.keys(data).length===0){return null;}
+    const { content, totalElements,size, }=data;
+   
+    const resData= AddKey(content, 'pkParentfunc');
     const paginationProps = {
         showSizeChanger: true,
         showQuickJumper: true,
-        ...pagination,
+        total: totalElements, 
+        pageSize: size, 
+        defaultCurrent: 1,
       };
 
     const parentMethods = {
@@ -116,22 +150,11 @@ class MenuManage extends PureComponent {
         onOk: () => this.deleteItem(currentId),
       });
     };
-    const roleEdit = (key, id) => {
-      const { 
-        dispatch, 
-      } = this.props;
-      dispatch({
-        type: 'menuManage/getUpdate',
-        payload: {
-          desc: id,
-        },
-        callback: (data) => {
-          this.setState({
-            current:data,
-          })
-        },
+    const roleEdit = (key, rowData) => {
+      this.setState({
+        current:rowData,
       });
-      
+
       this.handleModalVisible(true);
     };
     const Add=()=> {
@@ -143,8 +166,8 @@ class MenuManage extends PureComponent {
     const columns = [
       {
         title: '名称',
-        dataIndex: 'name',
-        key: 'name',
+        dataIndex: 'parentfuncname',
+        key: 'parentfuncname',
       },
       {
         title: 'URL',
@@ -172,7 +195,7 @@ class MenuManage extends PureComponent {
             <Tooltip title="编辑">
               <Button
                 icon="edit"
-                onClick={({ key }) => roleEdit(key, record.key)}
+                onClick={({ key }) => roleEdit(key, record)}
                 type="primary"
                 style={{ marginRight: '8px' }}
               />
@@ -180,7 +203,7 @@ class MenuManage extends PureComponent {
             <Tooltip title="删除">
               <Button
                 icon="delete"
-                onClick={({ key }) => roleDelete(key, record.key)}
+                onClick={({ key }) => roleDelete(key, record.pkParentfunc )}
                 type="primary"
               />
             </Tooltip>
@@ -199,7 +222,7 @@ class MenuManage extends PureComponent {
               </Button>
               <Search
                 className={styles.search}
-                placeholder="请输入角色名称"
+                placeholder="请输入名称"
                 enterButton="搜索"
                 onSearch={this.handleSearch}
               />
@@ -207,9 +230,10 @@ class MenuManage extends PureComponent {
 
             <Table
               loading={loading}
-              dataSource={list}
+              dataSource={resData}
               pagination={paginationProps}
               columns={columns}
+              onChange={this.handleTableChange}
             />
           </div>
         </Card>

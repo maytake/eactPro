@@ -14,10 +14,10 @@ const FormItem = Form.Item;
 
 
 @connect(({ loading }) => ({
-  submitting: loading.effects['form/submitRegularForm'],
+  submitting: loading.effects['changepassword/submitRegularForm'],
 }))
 @Form.create()
-class BasicForms extends PureComponent {
+class ChangePw extends PureComponent {
   handleSubmit = e => {
     const { dispatch, form } = this.props;
     e.preventDefault();
@@ -25,16 +25,19 @@ class BasicForms extends PureComponent {
       if (!err) {
         dispatch({
           type: 'changepassword/submitRegularForm',
-          payload: values,
+          payload: {
+            oldPwd:values.oldpassword,
+            newPwd:values.newpassword,
+          },
         });
       }
     });
   };
 
   render() {
-    const { submitting, history } = this.props;
+    const { submitting, history,form } = this.props;
     const {
-      form: { getFieldDecorator, getFieldValue },
+      form: { getFieldDecorator },
     } = this.props;
 
     const formItemLayout = {
@@ -56,6 +59,23 @@ class BasicForms extends PureComponent {
       },
     };
 
+    const checkConfirm = (rule, value, callback) => {
+      if (value && value !== form.getFieldValue('newpassword')) {
+        callback('两次输入的密码不匹配!');
+      } else {
+        callback();
+      }
+    };
+    const checkPassword = (rule, value, callback) => {
+      const pass = /^\S*([a-zA-Z]+\S*[0-9]+|[0-9]+\S*[a-zA-Z]+)\S*$/.test(value);
+      if (!value) {
+        callback('请输入密码！');
+      } else if (value.length < 8 && !pass) {
+          callback('密码有误！');
+        } else {
+          callback();
+        }
+    };
     return (
       <PageHeaderWrapper
         title="修改密码"
@@ -64,7 +84,7 @@ class BasicForms extends PureComponent {
         <Card bordered={false}>
           <Form onSubmit={this.handleSubmit} hideRequiredMark style={{ marginTop: 8 }}>
             <FormItem {...formItemLayout} label="旧密码">
-              {getFieldDecorator('password', {
+              {getFieldDecorator('oldpassword', {
                 rules: [
                   {
                     required: true,
@@ -77,8 +97,7 @@ class BasicForms extends PureComponent {
               {getFieldDecorator('newpassword', {
                 rules: [
                   {
-                    required: true,
-                    message: '请输入新密码',
+                    validator: checkPassword,
                   },
                 ],
               })(<Input type="password" placeholder="请输入新密码" />)}
@@ -89,6 +108,10 @@ class BasicForms extends PureComponent {
                   {
                     required: true,
                     message: '请再输入新密码',
+                    
+                  },
+                  {
+                    validator: checkConfirm,
                   },
                 ],
               })(<Input type="password" placeholder="请再输入新密码" />)}
@@ -107,4 +130,4 @@ class BasicForms extends PureComponent {
   }
 }
 
-export default BasicForms;
+export default ChangePw;

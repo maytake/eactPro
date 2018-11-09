@@ -1,12 +1,12 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import moment from 'moment';
 import router from 'umi/router';
-import { Row, Col, Card, Form, Input, Button, Modal, message, Table, Tooltip } from 'antd';
+import { Card, Form, Input, Button, Modal, Table, Tooltip } from 'antd';
+import { AddKey } from '@/utils/utils';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
+import { parse } from 'url';
 import AddResource from './AddResource';
 import styles from './Resource.less';
-
 
 const { Search } = Input;
 
@@ -26,9 +26,20 @@ class Resource extends PureComponent {
   }
 
   componentDidMount() {
+    const params = parse(window.location.href, true).query;
+    this.getData(params.name);
+  }
+
+  getData(v){
     const { dispatch } = this.props;
     dispatch({
       type: 'resource/fetchResource',
+      payload: {
+        page: "1",
+        pageSize : "20",
+        sortType: "auto",
+        name:v
+        },
     });
   }
 
@@ -38,23 +49,43 @@ class Resource extends PureComponent {
     });
   };
 
-  handleAdd = fields => {
-    const {
-      dispatch,
-      resource: { addResult },
-    } = this.props;
-    dispatch({
-      type: 'resource/add',
-      payload: {
-        desc: fields,
-      },
-    });
+  handleAdd = (fields, id) => {
+    const { dispatch} = this.props;
+    if(id){
+      dispatch({
+        type: 'resource/getUpdate',
+        payload: {
+          id,
+          ...fields,
+        },
+        callback: () => {
+          this.getData();
+        }
+      });
+    }else{
+      dispatch({
+        type: 'resource/add',
+        payload: {
+          ...fields,
+        },
+        callback: () => {
+          this.getData();
+        }
+      });
+    }
+    this.handleModalVisible();
+  };
 
-    message.success(addResult.msg);
+  handleTableChange = (pagination, filters, sorter) => {
+    const { dispatch } = this.props;
     dispatch({
       type: 'resource/fetchResource',
+      payload: {
+        page: pagination.current,
+        pageSize : pagination.pageSize,
+        sortType: "auto",
+        },
     });
-    this.handleModalVisible();
   };
 
   handleSearch(v) {
@@ -70,29 +101,33 @@ class Resource extends PureComponent {
   }
 
   deleteItem(id) {
-    const {
-      dispatch,
-      resource: { reomveResult },
-    } = this.props;
+    const { dispatch } = this.props;
     dispatch({
       type: 'resource/remove',
       payload: {
-        desc: id,
+        id,
       },
-    });
-    message.success(reomveResult.msg);
-    dispatch({
-      type: 'resource/fetchResource',
+      callback: () => {
+        this.getData();
+      }
     });
   }
 
+
   render() {
+    
+
     const {current}=this.state;
     const {
+      dispatch,
       loading,
-      resource: { dataSource },
+      resource: { dataSource, category},
     } = this.props;
-  
+    const { content, totalElements, size }=dataSource;
+    let resData;
+    if(Object.keys(dataSource).length!==0){
+      resData= AddKey(content, 'id'); 
+    };
     const parentMethods = {
       handleAdd: this.handleAdd,
       handleModalVisible: this.handleModalVisible,
@@ -101,9 +136,9 @@ class Resource extends PureComponent {
     const paginationProps = {
       showSizeChanger: true,
       showQuickJumper: true,
-      defaultCurrent: 2,
-      total: 100,
-      pageSize: 10,
+      defaultCurrent: 1,
+      total: totalElements, 
+      pageSize: size, 
     };
 
     const roleDelete = (key, currentId) => {
@@ -116,13 +151,13 @@ class Resource extends PureComponent {
       });
     };
     const roleEdit = (key, id) => {
-      const { 
-        dispatch, 
-      } = this.props;
       dispatch({
-        type: 'resource/getUpdate',
+        type: 'resource/getCategory',
+      });
+      dispatch({
+        type: 'resource/resourceToUpdate',
         payload: {
-          desc: id,
+          id,
         },
         callback: (data) => {
           this.setState({
@@ -130,10 +165,12 @@ class Resource extends PureComponent {
           })
         },
       });
-      
       this.handleModalVisible(true);
     };
     const Add=()=> {
+      dispatch({
+        type: 'resource/getCategory',
+      });
       this.setState({
         current:{},
       })
@@ -142,23 +179,23 @@ class Resource extends PureComponent {
     const columns = [
       {
         title: '名称',
-        dataIndex: 'name',
-        key: 'name',
+        dataIndex: 'funcName',
+        key: 'funcName',
       },
       {
         title: 'URL',
-        dataIndex: 'url',
-        key: 'url',
+        dataIndex: 'funcUrl',
+        key: 'funcUrl',
       },
       {
         title: '权限字符串',
-        dataIndex: 'string',
-        key: 'string',
+        dataIndex: 'funcCode',
+        key: 'funcCode',
       },
       {
         title: '可见范围',
-        dataIndex: 'visibleRange',
-        key: 'visibleRange',
+        dataIndex: 'visible_scope',
+        key: 'visible_scope',
       },
       {
         title: '操作',
@@ -202,16 +239,16 @@ class Resource extends PureComponent {
                 onSearch={this.handleSearch}
               />
             </div>
-
             <Table
               loading={loading}
-              dataSource={dataSource}
+              dataSource={resData}
               pagination={paginationProps}
               columns={columns}
+              onChange={this.handleTableChange}
             />
           </div>
         </Card>
-        <AddResource modalVisible={this.state.modalVisible} {...parentMethods} updateResult={current} />
+        <AddResource modalVisible={this.state.modalVisible} {...parentMethods} updateResult={current} category={category.data} />
       </PageHeaderWrapper>
     );
   }
