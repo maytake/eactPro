@@ -123,7 +123,7 @@ class MenuManage extends PureComponent {
       loading,
       menuManage: { data },
     } = this.props;
-    if(Object.keys(data).length===0){return null;}
+  
     const { content, totalElements,size, }=data;
    
     const resData= AddKey(content, 'pkParentfunc');

@@ -196,6 +196,9 @@ class Resource extends PureComponent {
         title: '可见范围',
         dataIndex: 'visible_scope',
         key: 'visible_scope',
+        render: text => {
+          return text === 1 ? '仅集团可见' : '集团和4s店都可见';
+        },
       },
       {
         title: '操作',

@@ -28,7 +28,7 @@ export default {
     memberInfoResult(state, { payload }) {
       return {
         ...state,
-        memberInfo: payload.data,
+        memberInfo: payload?payload.data:{},
       };
     },
   },

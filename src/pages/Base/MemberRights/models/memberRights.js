@@ -1,5 +1,5 @@
 
-import { LoginOut } from '@/services/getApi';
+import { queryMenus } from '@/services/getApi';
 
 export default {
   namespace: 'memberRights',
@@ -10,7 +10,7 @@ export default {
 
   effects: {
     *fetchData({ payload }, { call, put }) {
-      const response = yield call(LoginOut,payload);
+      const response = yield call(queryMenus,payload);
       yield put({
         type: 'show',
         payload: response

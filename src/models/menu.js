@@ -1,5 +1,5 @@
 
-import { queryRoutes } from '@/services/api';
+import { queryMenus } from '@/services/api';
 
 export default {
     namespace: 'menu',
@@ -10,7 +10,7 @@ export default {
 
     effects: {
         *fetchMenu(_, { call, put }) {
-            const response = yield call(queryRoutes);
+            const response = yield call(queryMenus);
             yield put({
                 type: 'getMenuData',
                 payload: response
@@ -23,7 +23,7 @@ export default {
         getMenuData(state, { payload }) {
             return {
                 ...state,
-                menuData: payload
+                menuData: payload.data||[]
             };
         },
     },

@@ -68,3 +68,26 @@ export async function joinMember(params) {
 export async function memberTags(params) {
   return postData('/CRM/mbe3/mgrDefdoclist/refinfodes.json', params);
 }
+
+export async function updateMember(params) {
+  return postData('/CRM/mbe3/mgrMembermgcust/update.json', params);
+}
+
+// carInfo
+export async function carInfo(params) {
+  return postData('/CRM/mbe3/mgrMembermgcar/carList.json', params);
+}
+
+export async function startCar(params) {
+  return postData('/CRM/mbe3/mgrMembermgcar/start.json', params);
+}
+
+export async function stopCar(params) {
+  return postData('/CRM/mbe3/mgrMembermgcar/stop.json', params);
+}
+
+export async function setCar(params) {
+  return postData('/CRM/mbe3/mgrMembermgcar/turnDefault.json', params);
+}
+
+

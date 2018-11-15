@@ -1,7 +1,8 @@
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
 import router from 'umi/router';
-import { Row, Col, Card, Form, Input, Button, Select, Modal, message, Table, Tooltip, Divider, DatePicker } from 'antd';
+import { Row, Col, Card, Form, Input, Badge, Button, Select, Modal, message, Table, Tooltip, Divider, DatePicker } from 'antd';
+import Link from 'umi/link';
 import { AddKey } from '@/utils/utils';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './MemberProfile.less';
@@ -120,6 +121,7 @@ class MemberProfile extends PureComponent {
   }
 
   Add() {
+    localStorage.removeItem('memberId');
     router.push('/member/memberProfile/addMember/memberInfo')
   }
 
@@ -188,6 +190,7 @@ class MemberProfile extends PureComponent {
  
     const { getFieldDecorator } = this.props.form;
     const {
+      match,
       loading,
       memberProfile: { dataSource},
     } = this.props;
@@ -226,6 +229,12 @@ class MemberProfile extends PureComponent {
         title: '会员姓名',
         dataIndex: 'name',
         key: 'name',
+        render: (text, record) => {
+            const id =record.pkMembermgcust
+            return (
+                <Link to={{ pathname :`${match.url}/addMember/memberInfo`, query: { id }}}> {text }</Link>
+            );
+        },
       },
       {
         title: '会员编码',
@@ -273,7 +282,7 @@ class MemberProfile extends PureComponent {
         key: 'vstatus',
         render: text => {
           // eslint-disable-next-line no-nested-ternary
-          return text === 1 ?'启用': text === 2?'停用':'未启用' ;
+          return text === 1 ? <Badge status="success" text='启用' /> : text === 2 ? <Badge status="error" text="停用" /> : <Badge status="default" text="未启用" />;
         },
       },
       {
@@ -377,10 +386,11 @@ class MemberProfile extends PureComponent {
                   <FormItem {...this.formItemLayout} label='会员等级：'>
                     {getFieldDecorator('grades')(
                       <Select
+                        allowClear
                         placeholder="请选择会员等级"
                         onChange={this.handleSelectChange}
                       >
-                        <Option value="undefined">请选择会员等级</Option>
+                        
                         <Option value="251">普卡</Option>
                         <Option value="252">银卡</Option>
                         <Option value="253">金卡</Option>
@@ -395,10 +405,11 @@ class MemberProfile extends PureComponent {
                   <FormItem {...this.formItemLayout} label='4S店：'>
                     {getFieldDecorator('foursshop')(
                       <Select
+                        allowClear
                         placeholder="请选择4S店"
                         onChange={this.handleSelectChange}
                       >
-                        <Option value="undefined">请选择4S店</Option>
+                      
                         <Option value="1">集团管理员</Option>
                         <Option value="2">集团业务员</Option>
                         <Option value="3">4S店管理员</Option>
@@ -414,6 +425,7 @@ class MemberProfile extends PureComponent {
                   <FormItem {...this.formItemLayout} label='状态：'>
                     {getFieldDecorator('vstatus')(
                       <Select
+                        allowClear
                         placeholder="请选择状态"
                         onChange={this.handleSelectChange}
                       >

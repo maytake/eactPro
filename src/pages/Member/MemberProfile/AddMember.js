@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card,Button, Icon } from 'antd';
+import { Card,Button, Modal  } from 'antd';
 import router from 'umi/router';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import DescriptionList from '@/components/DescriptionList';
@@ -23,6 +23,7 @@ class AddMember extends PureComponent {
   componentDidMount() {
     const { dispatch } = this.props;
     const id=this.props.location.query.id;
+    
     if(id){
       this.getEdit(id);
     }else{
@@ -52,36 +53,44 @@ class AddMember extends PureComponent {
   };
 
   onTabChange = key => {
-    const id=this.props.location.query.id;
-    const { match } = this.props;
-    switch (key) {
-      case 'memberInfo':
-        router.push({
-          pathname:`${match.url}/memberInfo`,
-          query:{id}
-        });
-        break;
-      case 'becomeMember':
-        router.push({
-          pathname:`${match.url}/becomeMember`,
-          query:{id}
-        });
-        break;
-      case 'carInfo':
-        router.push({
-          pathname:`${match.url}/carInfo`,
-          query:{id}
-        });
-        break;
-      case 'packageInfo':
-        router.push({
-          pathname:`${match.url}/packageInfo`,
-          query:{id}
-        });
-        break;
-      default:
-        break;
+    const { match,location } = this.props;
+    const id =location.query.id;
+    if(!id){
+      Modal.warning({
+        title: '提示',
+        content: '请先保存会员信息!',
+      });
+    }else{
+      switch (key) {
+        case 'memberInfo':
+          router.push({
+            pathname:`${match.url}/memberInfo`,
+            query:{id}
+          });
+          break;
+        case 'becomeMember':
+          router.push({
+            pathname:`${match.url}/becomeMember`,
+            query:{id}
+          });
+          break;
+        case 'carInfo':
+          router.push({
+            pathname:`${match.url}/carInfo`,
+            query:{id}
+          });
+          break;
+        case 'packageInfo':
+          router.push({
+            pathname:`${match.url}/packageInfo`,
+            query:{id}
+          });
+          break;
+        default:
+          break;
+      }
     }
+
   };
 
   render() {
@@ -163,14 +172,13 @@ class AddMember extends PureComponent {
             bordered={false}
             style={{ width: '100%' }}
             tabList={operationTabList}
-            activeTabKey={location.pathname.replace(`${match.path}/`, '')}
+            activeTabKey={location.pathname.replace(`${match.path}/`, '').split('/')[0]}
             onTabChange={(key) => { this.onTabChange(key); }}
             loading={listLoading}
           >
             {children}
           </Card>
         </section>
-
       </PageHeaderWrapper>
     );
   }

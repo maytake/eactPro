@@ -23,7 +23,10 @@ const postData=async (url, params)=>{
   return res;
 }
 
-
+// menu
+export async function queryMenus(params) {
+  return postData('/CRM/mbe3/mgrFunction/menu.json', params);
+}
 
 // resource
 export async function Resource(params) {
@@ -35,7 +38,7 @@ export async function RemoveResource(params) {
 }
 
 export async function AddResource(params) {
-  return postData('/CRM/mbe3/mgrFunction/save.json', params);
+  return postData('/CRM/mbe3/mgrFunction/create.json', params);
 
 }
 
@@ -69,7 +72,7 @@ export async function getMenuUpdate(params) {
 }
 
 export async function AddMenu(params) {
-  return postData('/CRM/mbe3/mgrParentFunc/save.json', params);
+  return postData('/CRM/mbe3/mgrParentFunc/create.json', params);
 }
 
 // home

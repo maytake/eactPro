@@ -1,9 +1,10 @@
 /* eslint-disable no-nested-ternary */
 import React, { PureComponent, Fragment } from 'react';
-import { Divider } from 'antd';
+import { Divider,Icon } from 'antd';
 import isEqual from 'lodash/isEqual';
 import DescriptionList from '@/components/DescriptionList';
 import { connect } from 'dva';
+import styles from './AddMember.less';
 const { Description } = DescriptionList;
 
 
@@ -21,10 +22,10 @@ class JoinMember extends PureComponent {
     }
 
     static getDerivedStateFromProps(nextProps, preState) {
-        console.log(nextProps.joinMember.memberInfo);
-        console.log(preState.memberInfo);
+        // console.log(nextProps.joinMember.memberInfo);
+        // console.log(preState.memberInfo);
         if (isEqual(nextProps.joinMember.memberInfo, preState.memberInfo)) {
-            console.log(111);
+           // console.log(111);
             return null;
         }
         return {
@@ -35,12 +36,18 @@ class JoinMember extends PureComponent {
     componentDidMount() {
         const { dispatch } = this.props;
         const id = this.props.location.query.id;
-        dispatch({
-            type: 'joinMember/becomeMember',
-            payload: {
-                pkMembermgcust: id
-            }
-        });
+        if(id){
+            dispatch({
+                type: 'joinMember/becomeMember',
+                payload: {
+                    pkMembermgcust: id
+                }
+            });
+        }else{
+            dispatch({
+                type: 'joinMember/memberInfoResult',
+            });
+        }
     }
 
     render() {
@@ -49,7 +56,16 @@ class JoinMember extends PureComponent {
             joinMember: { memberInfo },
         } = this.props;
 
-        if (Object.keys(memberInfo).length === 0) { return null; }
+        if (Object.keys(memberInfo).length === 0) { 
+            return (
+                <div className="ant-card-body">
+                    <div className={styles.noData}>
+                        <Icon type="frown-o" />
+                        暂无数据
+                    </div>
+                </div>
+            );
+        }
         const current = memberInfo || {};
         return (
             <Fragment>

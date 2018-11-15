@@ -8,14 +8,17 @@ import {
   DatePicker,
   Input,
   Select,
+  message,
   Upload,
   Cascader,
+  Spin,
 } from 'antd';
 import moment from 'moment';
 import { connect } from 'dva';
 import Link from 'umi/link';
 import router from 'umi/router';
 import styles from './MemberInfo.less';
+import citys from '@/utils/geographic';
 const Search = Input.Search;
 const FormItem = Form.Item;
 const { Option, OptGroup } = Select;
@@ -41,7 +44,7 @@ const AvatarView = ({ avatar }) => (
 @connect(({ user, addMemberProfile, loading }) => ({
   currentUser: user.currentUser,
   addMemberProfile,
-  loading: loading.models.addMemberProfile,
+  loadings: loading.models.addMemberProfile,
 }))
 @Form.create()
 class MemberInfo extends PureComponent {
@@ -74,649 +77,758 @@ class MemberInfo extends PureComponent {
     return url;
   }
 
-  validate = () => {
+  validate = (e) => {
+    e.preventDefault();
     const {
       form: { validateFieldsAndScroll },
       dispatch,
+      addMemberProfile: { dataSource },
+      location,
     } = this.props;
+    const id=location.query.id;
+    const entity = Object.keys(dataSource).length !== 0 && dataSource.entity;
     validateFieldsAndScroll((error, values) => {
-      console.log(values);
       if (!error) {
-        console.log(values);
+        const { residentialAddress, usingAddresse, idcradAddress, source } = values;
+        const firstStartTime = values.firstStartTime;
+        const dateofbirth = values.dateofbirth;
+        const newData = {
+          ...values,
+          // 使用地址、居住地址、身份证地址
+          connprovince: residentialAddress && residentialAddress[0],
+          conncity: residentialAddress && residentialAddress[1],
+          connarea: residentialAddress && residentialAddress[2],
+          unitprovince: usingAddresse && usingAddresse[0],
+          unitcity: usingAddresse && usingAddresse[1],
+          unitarea: usingAddresse && usingAddresse[2],
+          paperprovince: idcradAddress && idcradAddress[0],
+          papercity: idcradAddress && idcradAddress[1],
+          paperarea: idcradAddress && idcradAddress[2],
+          residentialAddress: null,
+          usingAddresse: null,
+          idcradAddress: null,
+          dateofbirth: dateofbirth && dateofbirth.format('YYYY-MM-DD HH:mm:ss'),
+          firstStartTime: firstStartTime && firstStartTime.format('YYYY-MM-DD HH:mm:ss'),
+          source:source === '新数据'  ? 0 : 1,
+        };
+        const params = { ...entity, ...newData, }
+        console.log(params)
+        if(id){
+          dispatch({
+            type: 'addMemberProfile/update',
+            payload: {
+              ...params
+            },
+            callback: () => {
+              dispatch({
+                type: 'addMemberProfile/toUpdate',
+                payload: {
+                  pkMembermgcust: entity.pkMembermgcust,
+                }
+              });
+            }
+          });
+        }else{
+          dispatch({
+            type: 'addMemberProfile/create',
+            payload: {
+              ...params
+            },
+            callback: () => {
+              router.push({
+                pathname: '/member/memberProfile',
+              })
+            }
+          });
+        }
       }
     });
   };
 
   render() {
-
     const {
       form: { getFieldDecorator },
+      loadings,
       addMemberProfile: { dataSource, memberTags },
     } = this.props;
     if (Object.keys(dataSource).length === 0) { return null; }
     const entity = dataSource.entity;
     const current = entity || {};
-    const industry=dataSource.industryLi;
-    const occupaction=dataSource.occupactionLi;
-    const unittype=dataSource.unittyLi;
-    
-    const citys = [{
-      value: 'zhejiang',
-      label: 'Zhejiang',
-      children: [{
-        value: 'hangzhou',
-        label: 'Hangzhou',
-        children: [{
-          value: 'xihu',
-          label: 'West Lake',
-        }],
-      }],
-    }, {
-      value: 'jiangsu',
-      label: 'Jiangsu',
-      children: [{
-        value: 'nanjing',
-        label: 'Nanjing',
-        children: [{
-          value: 'zhonghuamen',
-          label: 'Zhong Hua Men',
-        }],
-      }],
-    }];
+    const industry = dataSource.industryLi;
+    const expectation = dataSource.reminding;
+    const hopeActivity = dataSource.activity;
+    const occupaction = dataSource.occupactionLi;
+    const unittype = dataSource.unittyLi;
+    const entertainment = dataSource.entertainment;
+    const health = dataSource.health;
+    const sport = dataSource.sport;
+    const collection = dataSource.collection;
 
-    const getTagsOption=()=>{
-      return memberTags.map((item,i) => (
-        <OptGroup key={item.description+i} label={item.description}>
+    const getTagsOption = () => {
+      return memberTags.map((item, i) => (
+        <OptGroup key={item.description + i} label={item.description}>
           {
-            item.load&&item.load.map((n,j)=> (
-              <Option key={n.NAME+j} value={n.NAME}>
+            item.load && item.load.map((n, j) => (
+              <Option key={n.NAME + j} value={n.NAME}>
                 {n.NAME}
-              </Option> 
+              </Option>
             ))
           }
         </OptGroup>
       ));
     }
 
-    const getOption=(data)=>{
-      return data.map((item,i) => (
-        <Option key={item.value} value={item.value}>
-          {item.value}
-        </Option> 
+    const getOption = (data = [], name) => {
+      return data.map((item, i) => (
+        <Option key={item[name]} value={item[name]}>
+          {item[name]}
+        </Option>
       ));
     }
-   
+
 
     return (
       <Fragment>
-        <Form hideRequiredMark className={styles.labelItem}>
-        
-          <div className="ant-card-head">
-            <div className="ant-card-head-wrapper">
-              <div className="ant-card-head-title">仓库管理</div>
+        <Spin spinning={loadings}>
+          <Form hideRequiredMark className={styles.labelItem}>
+            <div className="ant-card-head">
+              <div className="ant-card-head-wrapper">
+                <div className="ant-card-head-title">仓库管理</div>
+              </div>
             </div>
-          </div>
 
-          <div className="ant-card-body">
-            <Row gutter={24}>
-              <Col md={4}>
-                <FormItem>
+            <div className="ant-card-body">
+              <Row gutter={24}>
+                <Col md={4}>
+                  <FormItem>
 
-                  <AvatarView avatar={this.getAvatarURL()} />
+                    <AvatarView avatar={this.getAvatarURL()} />
 
-                </FormItem>
-              </Col>
-              <Col md={20}>
-                <Row gutter={24}>
-                  <Col {...this.colLayout}>
-                    <FormItem label="会员编码">
-                      {getFieldDecorator('membercode', {
-                        rules: [{ required: true, message: '请输入会员编码!' }],
-                        initialValue: current.membercode,
-                      })(<Input disabled placeholder="请输入会员编码" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="会员卡号 ">
-                      {getFieldDecorator('phusicalcardno', {
-                        rules: [{ required: true, message: '请输入会员卡号 !' }],
-                        initialValue: current.phusicalcardno,
-                      })(<Input disabled placeholder="请输入会员卡号 " />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="会员昵称">
-                      {getFieldDecorator('nickname', {
-                        rules: [{ required: true, message: '请输入会员昵称!' }],
-                        initialValue: current.nickname,
-                      })(<Input disabled placeholder="请输入会员昵称" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="会员姓名">
-                      {getFieldDecorator('name', {
-                        rules: [{ required: true, message: '请输入会员姓名!' }],
-                        initialValue: current.name,
-                      })(<Input placeholder="请输入会员姓名！" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="会员性别">
-                      {getFieldDecorator('sex', {
-                        rules: [{ required: true, message: '请选择会员性别!' }],
-                        initialValue: current.sex&&String(current.sex)||undefined,
-                      })(
-                        <Select
-                          style={{ width: '100%' }}
-                          placeholder="请选择会员性别"
-                          help="会员性别可多选"
-                        >
-                          <Option value="1">男</Option>
-                          <Option value="2">女</Option>
-                        </Select>)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="手机号">
-                      {getFieldDecorator('mobilephone', {
-                        rules: [{ required: true, message: '请输入手机号!' }],
-                        initialValue: current.mobilephone,
-                      })(<Input disabled placeholder="请输入手机号" />)}
-                    </FormItem>
-                  </Col>
+                  </FormItem>
+                </Col>
+                <Col md={20}>
+                  <Row gutter={24}>
+                    <Col {...this.colLayout}>
+                      <FormItem label="会员编码">
+                        {getFieldDecorator('membercode', {
+                          initialValue: current.membercode,
+                        })(<Input disabled placeholder="请输入会员编码" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="会员卡号 ">
+                        {getFieldDecorator('phusicalcardno', {
 
-                  <Col {...this.colLayout}>
-                    <FormItem label="证件类型">
-                      {getFieldDecorator('paperstype', {
-                        rules: [{ required: true, message: '请选择证件类型!' }],
-                        initialValue: current.paperstype&&String(current.paperstype)||undefined,
-                      })(
-                        <Select
-                          style={{ width: '100%' }}
-                          placeholder="请选择证件类型"
-                          help="证件类型"
-                        >
-                          <Option value="0">身份证</Option>
-                          <Option value="1">护照</Option>
-                          <Option value="2">港澳台证件</Option>
-                          <Option value="3">退伍军人证</Option>
-                          <Option value="6">其它</Option>
-                        </Select>
+                          initialValue: current.phusicalcardno,
+                        })(<Input disabled placeholder="请输入会员卡号 " />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="会员昵称">
+                        {getFieldDecorator('nickname', {
 
-                      )}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="证件号">
-                      {getFieldDecorator('paperscode', {
-                        rules: [{ required: true, message: '请输入部门!' }],
-                        initialValue: current.paperscode,
-                      })(<Input placeholder="请输入部门" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="会员标签(多选)">
-                      {getFieldDecorator('tag', {
-                        initialValue: current.tag || undefined,
-                      })(
-                        <Select
-                          mode="tags"
-                          placeholder="请选择会员标签(多选)"
-                          showSearch
-                        >
-                          {getTagsOption()}
-                        </Select>
-                      )}
-                    </FormItem>
-                  </Col>
+                          initialValue: current.nickname,
+                        })(<Input disabled placeholder="请输入会员昵称" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="会员姓名">
+                        {getFieldDecorator('name', {
+                          rules: [{ required: true, message: '请输入会员姓名!' }],
+                          initialValue: current.name,
+                        })(<Input placeholder="请输入会员姓名！" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="会员性别">
+                        {getFieldDecorator('sex', {
+                          rules: [{ required: true, message: '请选择会员性别!' }],
+                          initialValue: current.sex && String(current.sex) || undefined,
+                        })(
+                          <Select
+                            allowClear
+                            style={{ width: '100%' }}
+                            placeholder="请选择会员性别"
+                            help="会员性别可多选"
+                          >
+                            <Option value="1">男</Option>
+                            <Option value="2">女</Option>
+                          </Select>)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="手机号">
+                        {getFieldDecorator('mobilephone', {
+                          rules: [
+                            { required: true, message: '请输入手机号!' },
+                            { pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }
+                          ],
+                          initialValue: current.mobilephone,
+                        })(<Input placeholder="请输入手机号" />)}
+                      </FormItem>
+                    </Col>
+                  </Row>
+                  <Row gutter={24}>
+                    <Col {...this.colLayout}>
+                      <FormItem label="证件类型">
+                        {getFieldDecorator('paperstype', {
+                          rules: [{ required: true, message: '请选择证件类型!' }],
+                          initialValue: current.paperstype && String(current.paperstype) || undefined,
+                        })(
+                          <Select
+                            allowClear
+                            style={{ width: '100%' }}
+                            placeholder="请选择证件类型"
+                            help="证件类型"
+                          >
+                            <Option value="0">身份证</Option>
+                            <Option value="1">护照</Option>
+                            <Option value="2">港澳台证件</Option>
+                            <Option value="3">退伍军人证</Option>
+                            <Option value="6">其它</Option>
+                          </Select>
 
-                  <Col md={8}>
-                    <FormItem label="居住地址">
-                      {getFieldDecorator('province', {
-                        rules: [{ required: true, message: '请选择4Sshop!' }],
-                        initialValue: current.province,
-                      })(
-                        <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
-                      )}
-                    </FormItem>
-                  </Col>
-                  <Col md={16}>
-                    <FormItem>
-                      {getFieldDecorator('conndetail', {
-                        rules: [{ required: true, message: '请输入具体地址!' }],
-                        initialValue: current.conndetail,
-                      })(
-                        <Input
-                          className="cascader-adress"
-                          placeholder="请输入具体地址"
-                        />
-                      )}
-                    </FormItem>
-                  </Col>
+                        )}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="证件号">
+                        {getFieldDecorator('paperscode', {
+                          rules: [
+                            { required: true, message: '请输入证件号!' },
+                            { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '请输入15-18位证件号!' }
+                          ],
+                          initialValue: current.paperscode,
+                        })(<Input placeholder="请输入证件号" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="会员标签(多选)">
+                        {getFieldDecorator('tag', {
+                          initialValue: current.tag || undefined,
+                        })(
+                          <Select
+                            allowClear
+                            mode="tags"
+                            placeholder="请选择会员标签(多选)"
+                            showSearch
+                          >
+                            {getTagsOption()}
+                          </Select>
+                        )}
+                      </FormItem>
+                    </Col>
 
-                  <Col {...this.colLayout}>
-                    <FormItem label="入会时间">
-                      {getFieldDecorator('firstStartTime', {
-                        rules: [{ required: true, message: '请选择入会时间!' }],
-                        initialValue: current.firstStartTime ? moment(current.firstStartTime) : null,
-                      })(
-                        <DatePicker
-                          disabled
-                          showTime
-                          placeholder="请选择"
-                          format="YYYY-MM-DD HH:mm:ss"
-                          style={{ width: '100%' }}
-                        />
-                      )}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="入会邀请码">
-                      {getFieldDecorator('recomPeople', {
-                        rules: [{ required: true, message: '请输入入会邀请码!' }],
-                        initialValue: current.recomPeople,
-                      })(<Input disabled placeholder="请输入入会邀请码" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="APP推荐人">
-                      {getFieldDecorator('recomPeople', {
-                        rules: [{ required: true, message: '请输入APP推荐人!' }],
-                        initialValue: current.recomPeople,
-                      })(<Input disabled placeholder="请输入APP推荐人" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="首次绑车4S店">
-                      {getFieldDecorator('foursname', {
-                        rules: [{ required: true, message: '请输入首次绑车4S店!' }],
-                        initialValue: current.foursname,
-                      })(<Input disabled placeholder="请输入首次绑车4S店" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="数据来源">
-                      {getFieldDecorator('source', {
-                        rules: [{ required: true, message: '请输入数据来源!' }],
-                        initialValue: current.source===0?'新数据':'历史数据',
-                      })(<Input disabled placeholder="请输入数据来源" />)}
-                    </FormItem>
-                  </Col>
-                  <Col {...this.colLayout}>
-                    <FormItem label="数据来源端口">
-                      {getFieldDecorator('dataSourceChannelStr', {
-                        rules: [{ required: true, message: '请输入数据来源端口!' }],
-                        initialValue: current.dataSourceChannelStr,
-                      })(<Input disabled placeholder="请输入数据来源端口" />)}
-                    </FormItem>
-                  </Col>
-                </Row>
-              </Col>
-            </Row>
-          </div>
+                    <Col md={8}>
+                      <FormItem label="居住地址">
+                        {getFieldDecorator('residentialAddress', {
 
-          <div className="ant-card-head">
-            <div className="ant-card-head-wrapper">
-              <div className="ant-card-head-title">详细信息</div>
+                          initialValue: current.residentialAddress && current.residentialAddress.split(','),
+                        })(
+                          <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
+                        )}
+                      </FormItem>
+                    </Col>
+                    <Col md={16}>
+                      <FormItem>
+                        {getFieldDecorator('conndetail', {
+
+                          initialValue: current.conndetail,
+                        })(
+                          <Input
+                            className="cascader-adress"
+                            placeholder="请输入具体地址"
+                          />
+                        )}
+                      </FormItem>
+                    </Col>
+
+                    <Col {...this.colLayout}>
+                      <FormItem label="入会时间">
+                        {getFieldDecorator('firstStartTime', {
+
+                          initialValue: current.firstStartTime ? moment(current.firstStartTime) : null,
+                        })(
+                          <DatePicker
+                            disabled
+                            showTime
+                            placeholder="请选择"
+                            format="YYYY-MM-DD HH:mm:ss"
+                            style={{ width: '100%' }}
+                          />
+                        )}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="入会邀请码">
+                        {getFieldDecorator('recomPeople', {
+
+                          initialValue: current.recomPeople,
+                        })(<Input disabled placeholder="请输入入会邀请码" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="APP推荐人">
+                        {getFieldDecorator('recomPeople', {
+
+                          initialValue: current.recomPeople,
+                        })(<Input disabled placeholder="请输入APP推荐人" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="首次绑车4S店">
+                        {getFieldDecorator('foursname', {
+
+                          initialValue: current.foursname,
+                        })(<Input disabled placeholder="请输入首次绑车4S店" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="数据来源">
+                        {getFieldDecorator('source', {
+
+                          initialValue: (current.source === null || current.source === 0 )? '新数据' : '历史数据',
+                        })(<Input disabled placeholder="请输入数据来源" />)}
+                      </FormItem>
+                    </Col>
+                    <Col {...this.colLayout}>
+                      <FormItem label="数据来源端口">
+                        {getFieldDecorator('dataSourceChannelStr', {
+
+                          initialValue: current.dataSourceChannelStr,
+                        })(<Input disabled placeholder="请输入数据来源端口" />)}
+                      </FormItem>
+                    </Col>
+                  </Row>
+                </Col>
+              </Row>
             </div>
-          </div>
 
-          <div className="ant-card-body">
-            <Row gutter={24}>
-
-              <Col {...this.colLayout}>
-                <FormItem label="QQ号">
-                  {getFieldDecorator('qq', {
-                    rules: [{ required: true, message: '请输入QQ号!' }],
-                    initialValue: current.qq,
-                  })(<Input placeholder="请输入QQ号" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="微信号">
-                  {getFieldDecorator('weixin', {
-                    rules: [{ required: true, message: '请输入微信号!' }],
-                    initialValue: current.weixin,
-                  })(<Input disabled placeholder="请输入微信号" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="E-mail">
-                  {getFieldDecorator('mail', {
-                    rules: [{ required: true, message: '请输入E-mail!' }],
-                    initialValue: current.mail,
-                  })(<Input placeholder="请输入E-mail" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="生日日期">
-                  {getFieldDecorator('dateofbirth', {
-                    rules: [{ required: true, message: '请选择生日日期!' }],
-                    initialValue: current.dateofbirth ? moment(current.dateofbirth) : null,
-                  })(
-                    <DatePicker
-                      showTime
-                      placeholder="请选择"
-                      format="YYYY-MM-DD HH:mm:ss"
-                      style={{ width: '100%' }}
-                    />
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="婚姻状况">
-                  {getFieldDecorator('marry', {
-                    rules: [{ required: true, message: '请选择婚姻状况!' }],
-                    initialValue: current.marry&&String(current.marry)||undefined,
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择婚姻状况"
-                    >
-                      <Option value="1">男</Option>
-                      <Option value="2">女</Option>
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="学历">
-                  {getFieldDecorator('education', {
-                    rules: [{ required: true, message: '请选择学历!' }],
-                    initialValue: current.education&&String(current.education)||undefined,
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择学历"
-                    >
-                      <Option value="1">博士</Option>
-                      <Option value="2">硕士</Option>
-                      <Option value="3">本科/专科</Option>
-                      <Option value="4">高中/中专/技术</Option>
-                      <Option value="5">初中以下</Option>
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="行业">
-                  {getFieldDecorator('education', {
-                    rules: [{ required: true, message: '请选择行业!' }],
-                    initialValue: current.education&&String(current.education)||undefined,
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择行业"
-                    >
-                     {getOption(industry)}
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="公司名称">
-                  {getFieldDecorator('workunit', {
-                    rules: [{ required: true, message: '请输入公司名称!' }],
-                    initialValue: current.workunit,
-                  })(<Input placeholder="请输入公司名称" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="职务">
-                  {getFieldDecorator('occupaction', {
-                    rules: [{ required: true, message: '请选择职务!' }],
-                    initialValue: current.occupaction,
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择职务"
-                    >
-                      {getOption(occupaction)}
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="期望的提醒服务">
-                  {getFieldDecorator('remindservice', {
-                    rules: [{ required: true, message: '请选择期望的提醒服务!' }],
-                    initialValue: current.remindservice,
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择期望的提醒服务"
-                    >
-                      <option value="高级管理者">高级管理者</option>
-                      <option value="高级职员">高级职员</option>
-                      <option value="其他">其他</option>
-                      <option value="一般职员">一般职员</option>
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="期望的活动">
-                  {getFieldDecorator('hopeactivity', {
-                    rules: [{ required: true, message: '请选择期望的活动!' }],
-                    initialValue: current.hopeactivity,
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择期望的活动"
-                    >
-                      <option value="高级管理者">高级管理者</option>
-                      <option value="高级职员">高级职员</option>
-                      <option value="其他">其他</option>
-                      <option value="一般职员">一般职员</option>
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="客户性质">
-                  {getFieldDecorator('unittype', {
-                    rules: [{ required: true, message: '请选择客户性质!' }],
-                    initialValue: current.unittype||'',
-                  })(
-                    <Select
-                      style={{ width: '100%' }}
-                      placeholder="请选择客户性质"
-                    >
-                      {getOption(unittype)}
-                    </Select>
-                  )}
-                </FormItem>
-              </Col>
-
-              <Col md={8}>
-                <FormItem label="兴趣爱好">
-                  {getFieldDecorator('province', {
-                    rules: [{ required: true, message: '请选择4Sshop!' }],
-                    initialValue: current.province,
-                  })(
-                    <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
-                  )}
-                </FormItem>
-              </Col>
-              <Col md={16}>
-                <FormItem>
-                  {getFieldDecorator('aihao5', {
-                    rules: [{ required: true, message: '其他：宅、上网、电子游戏、金融理财、其他!' }],
-                    initialValue: current.aihao5,
-                  })(
-                    <Input
-                      className="cascader-adress"
-                      placeholder="其他：宅、上网、电子游戏、金融理财、其他"
-                    />
-                  )}
-                </FormItem>
-              </Col>
-
-              <Col md={8}>
-                <FormItem label="使用地址">
-                  {getFieldDecorator('province', {
-                    rules: [{ required: true, message: '请选择4Sshop!' }],
-                    initialValue: current.province,
-                  })(
-                    <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
-                  )}
-                </FormItem>
-              </Col>
-              <Col md={16}>
-                <FormItem>
-                  {getFieldDecorator('unitdetail', {
-                    rules: [{ required: true, message: '请输入具体地址!' }],
-                    initialValue: current.unitdetail,
-                  })(
-                    <Input
-                      className="cascader-adress"
-                      placeholder="请输入具体地址"
-                    />
-                  )}
-                </FormItem>
-              </Col>
-
-              <Col md={8}>
-                <FormItem label="身份证地址">
-                  {getFieldDecorator('paperdetail', {
-                    rules: [{ required: true, message: '请选择4Sshop!' }],
-                    initialValue: current.paperdetail,
-                  })(
-                    <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
-                  )}
-                </FormItem>
-              </Col>
-              <Col md={16}>
-                <FormItem>
-                  {getFieldDecorator('paperdetail', {
-                    rules: [{ required: true, message: '请输入具体地址!' }],
-                    initialValue: current.paperdetail,
-                  })(
-                    <Input
-                      className="cascader-adress"
-                      placeholder="请输入具体地址"
-                    />
-                  )}
-                </FormItem>
-              </Col>
-
-              <Col {...this.colLayout}>
-                <FormItem label="员工标识">
-                  {getFieldDecorator('staffTag ', {
-                    rules: [{ required: true, message: '请输入员工标识!' }],
-                    initialValue: current.staffTag ? current.staffTag : '否',
-                  })(<Input disabled placeholder="请输入员工标识" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="套餐标识">
-                  {getFieldDecorator('setmealTag', {
-                    rules: [{ required: true, message: '请输入套餐标识!' }],
-                    initialValue: current.setmealTag ? current.setmealTag : '否',
-                  })(<Input disabled placeholder="请输入套餐标识" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="车辆标识">
-                  {getFieldDecorator('carTag', {
-                    rules: [{ required: true, message: '请输入车辆标识!' }],
-                    initialValue: current.carTag ? current.carTag : '未认证',
-                  })(<Input disabled placeholder="请输入车辆标识" />)}
-                </FormItem>
-              </Col>
-            </Row>
-          </div>
-
-          <div className="ant-card-head">
-            <div className="ant-card-head-wrapper">
-              <div className="ant-card-head-title">备用联系人</div>
+            <div className="ant-card-head">
+              <div className="ant-card-head-wrapper">
+                <div className="ant-card-head-title">详细信息</div>
+              </div>
             </div>
-          </div>
 
-          <div className="ant-card-body">
-            <Row gutter={24}>
+            <div className="ant-card-body">
+              <Row gutter={24}>
+                <Col {...this.colLayout}>
+                  <FormItem label="QQ号">
+                    {getFieldDecorator('qq', {
+                      rules: [{
+                        pattern: /^[1-9][0-9]{4,14}$/, message: '请输入正确的QQ号码！',
+                      }],
+                      initialValue: current.qq,
+                    })(<Input placeholder="请输入QQ号" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="微信号">
+                    {getFieldDecorator('weixin', {
 
-              <Col {...this.colLayout}>
-                <FormItem label="联系人1姓名">
-                  {getFieldDecorator('remarkscontact', {
-                    rules: [{ required: true, message: '请输入联系人姓名!' }],
-                    initialValue: current.remarkscontact,
-                  })(<Input placeholder="请输入联系人姓名" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="与会员关系">
-                  {getFieldDecorator('contactperson', {
-                    rules: [{ required: true, message: '请输入与会员关系!' }],
-                    initialValue: current.contactperson,
-                  })(<Input placeholder="请输入与会员关系" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="手机号">
-                  {getFieldDecorator('remarksphone', {
-                    rules: [{ required: true, message: '请输入手机号!' }],
-                    initialValue: current.remarksphone,
-                  })(<Input placeholder="请输入手机号" />)}
-                </FormItem>
-              </Col>
+                      initialValue: current.weixin,
+                    })(<Input disabled placeholder="请输入微信号" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="E-mail">
+                    {getFieldDecorator('mail', {
+                      rules: [{
+                        pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/, message: '请输入正确的E-mail！',
+                      }],
+                      initialValue: current.mail,
+                    })(<Input placeholder="请输入E-mail" />)}
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row gutter={24}>
+                <Col {...this.colLayout}>
+                  <FormItem label="生日日期">
+                    {getFieldDecorator('dateofbirth', {
 
-              <Col {...this.colLayout}>
-                <FormItem label="联系人2姓名">
-                  {getFieldDecorator('remarkscontact1', {
-                    rules: [{ required: true, message: '请输入联系人姓名!' }],
-                    initialValue: current.remarkscontact1,
-                  })(<Input placeholder="请输入联系人姓名" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="与会员关系">
-                  {getFieldDecorator('contactperson1', {
-                    rules: [{ required: true, message: '请输入与会员关系!' }],
-                    initialValue: current.contactperson1,
-                  })(<Input placeholder="请输入与会员关系" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="手机号">
-                  {getFieldDecorator('remarksphone1', {
-                    rules: [{ required: true, message: '请输入手机号!' }],
-                    initialValue: current.remarksphone1,
-                  })(<Input placeholder="请输入手机号" />)}
-                </FormItem>
-              </Col>
+                      initialValue: current.dateofbirth ? moment(current.dateofbirth) : null,
+                    })(
+                      <DatePicker
+                        showTime
+                        placeholder="请选择"
+                        format="YYYY-MM-DD HH:mm:ss"
+                        style={{ width: '100%' }}
+                      />
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="婚姻状况">
+                    {getFieldDecorator('marry', {
 
-              <Col {...this.colLayout}>
-                <FormItem label="联系人3姓名">
-                  {getFieldDecorator('remarkscontact2', {
-                    rules: [{ required: true, message: '请输入联系人姓名!' }],
-                    initialValue: current.remarkscontact2,
-                  })(<Input placeholder="请输入联系人姓名" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="与会员关系">
-                  {getFieldDecorator('contactperson2', {
-                    rules: [{ required: true, message: '请输入与会员关系!' }],
-                    initialValue: current.contactperson2,
-                  })(<Input placeholder="请输入与会员关系" />)}
-                </FormItem>
-              </Col>
-              <Col {...this.colLayout}>
-                <FormItem label="手机号">
-                  {getFieldDecorator('remarksphone2', {
-                    rules: [{ required: true, message: '请输入手机号!' }],
-                    initialValue: current.remarksphone2,
-                  })(<Input placeholder="请输入手机号" />)}
-                </FormItem>
-              </Col>
-            </Row>
-          </div>
+                      initialValue: current.marry && String(current.marry) || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择婚姻状况"
+                      >
+                        <Option value="0">请选择婚姻状况</Option>
+                        <Option value="1">未婚</Option>
+                        <Option value="2">已婚</Option>
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="学历">
+                    {getFieldDecorator('education', {
 
+                      initialValue: current.education && String(current.education) || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择学历"
+                      >
+                        <Option value="0">请选择学历</Option>
+                        <Option value="1">博士</Option>
+                        <Option value="2">硕士</Option>
+                        <Option value="3">本科/专科</Option>
+                        <Option value="4">高中/中专/技术</Option>
+                        <Option value="5">初中以下</Option>
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="行业">
+                    {getFieldDecorator('industry', {
 
-        </Form>
-        <Button type="primary" style={{position:'fixed',bottom:'15px',right:'20px'}} onClick={this.validate}>
-            提交
+                      initialValue: current.industry && String(current.industry) || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择行业"
+                      >
+                        {getOption(industry, 'value')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="公司名称">
+                    {getFieldDecorator('workunit', {
+
+                      initialValue: current.workunit,
+                    })(<Input placeholder="请输入公司名称" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="职务">
+                    {getFieldDecorator('occupaction', {
+
+                      initialValue: current.occupaction || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择职务"
+                      >
+                        {getOption(occupaction, 'value')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="期望的提醒服务">
+                    {getFieldDecorator('remindservice', {
+
+                      initialValue: current.remindservice || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择期望的提醒服务"
+                      >
+                        {getOption(expectation, 'name')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="期望的活动">
+                    {getFieldDecorator('hopeactivity', {
+
+                      initialValue: current.hopeactivity || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择期望的活动"
+                      >
+                        {getOption(hopeActivity, 'name')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="客户性质">
+                    {getFieldDecorator('unittype', {
+
+                      initialValue: current.unittype || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="请选择客户性质"
+                      >
+                        {getOption(unittype, 'value')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+
+                <Col md={6}>
+                  <FormItem label="兴趣爱好">
+                    {getFieldDecorator('aihao1', {
+                      initialValue: current.aihao1 || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="休闲娱乐类"
+                      >
+                        {getOption(entertainment, 'name')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col md={4}>
+                  <FormItem label="">
+                    {getFieldDecorator('aihao2', {
+
+                      initialValue: current.aihao2 || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="生活养生类"
+                      >
+                        {getOption(health, 'name')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col md={4}>
+                  <FormItem label="">
+                    {getFieldDecorator('aihao3', {
+
+                      initialValue: current.aihao3 || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="体育运动类"
+                      >
+                        {getOption(sport, 'name')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col md={4}>
+                  <FormItem label="">
+                    {getFieldDecorator('aihao4', {
+
+                      initialValue: current.aihao4 || undefined,
+                    })(
+                      <Select
+                        allowClear
+                        style={{ width: '100%' }}
+                        placeholder="收藏品鉴类"
+                      >
+                        {getOption(collection, 'name')}
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col md={6}>
+                  <FormItem>
+                    {getFieldDecorator('aihao5', {
+
+                      initialValue: current.aihao5,
+                    })(
+                      <Input
+                        className="cascader-adress"
+                        placeholder="其他：宅、上网、电子游戏、金融理财、其他"
+                      />
+                    )}
+                  </FormItem>
+                </Col>
+
+                <Col md={8}>
+                  <FormItem label="使用地址">
+                    {getFieldDecorator('usingAddresse', {
+
+                      initialValue: current.usingAddresse && current.usingAddresse.split(','),
+                    })(
+                      <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
+                    )}
+                  </FormItem>
+                </Col>
+                <Col md={16}>
+                  <FormItem>
+                    {getFieldDecorator('unitdetail', {
+
+                      initialValue: current.unitdetail,
+                    })(
+                      <Input
+                        className="cascader-adress"
+                        placeholder="请输入具体地址"
+                      />
+                    )}
+                  </FormItem>
+                </Col>
+
+                <Col md={8}>
+                  <FormItem label="身份证地址">
+                    {getFieldDecorator('idcradAddress', {
+
+                      initialValue: current.idcradAddress && current.idcradAddress.split(','),
+                    })(
+                      <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
+                    )}
+                  </FormItem>
+                </Col>
+                <Col md={16}>
+                  <FormItem>
+                    {getFieldDecorator('paperdetail', {
+
+                      initialValue: current.paperdetail,
+                    })(
+                      <Input
+                        className="cascader-adress"
+                        placeholder="请输入具体地址"
+                      />
+                    )}
+                  </FormItem>
+                </Col>
+
+                <Col {...this.colLayout}>
+                  <FormItem label="员工标识">
+                    {getFieldDecorator('staffTag ', {
+
+                      initialValue: current.staffTag ? current.staffTag : '否',
+                    })(<Input disabled placeholder="请输入员工标识" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="套餐标识">
+                    {getFieldDecorator('setmealTag', {
+
+                      initialValue: current.setmealTag ? current.setmealTag : '否',
+                    })(<Input disabled placeholder="请输入套餐标识" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="车辆标识">
+                    {getFieldDecorator('carTag', {
+
+                      initialValue: current.carTag ? current.carTag : '未认证',
+                    })(<Input disabled placeholder="请输入车辆标识" />)}
+                  </FormItem>
+                </Col>
+              </Row>
+            </div>
+
+            <div className="ant-card-head">
+              <div className="ant-card-head-wrapper">
+                <div className="ant-card-head-title">备用联系人</div>
+              </div>
+            </div>
+
+            <div className="ant-card-body">
+              <Row gutter={24}>
+
+                <Col {...this.colLayout}>
+                  <FormItem label="联系人1姓名">
+                    {getFieldDecorator('remarkscontact', {
+
+                      initialValue: current.remarkscontact,
+                    })(<Input placeholder="请输入联系人姓名" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="与会员关系">
+                    {getFieldDecorator('contactperson', {
+
+                      initialValue: current.contactperson,
+                    })(<Input placeholder="请输入与会员关系" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="手机号">
+                    {getFieldDecorator('remarksphone', {
+                      rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
+                      initialValue: current.remarksphone,
+                    })(<Input placeholder="请输入手机号" />)}
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row gutter={24}>
+                <Col {...this.colLayout}>
+                  <FormItem label="联系人2姓名">
+                    {getFieldDecorator('remarkscontact1', {
+
+                      initialValue: current.remarkscontact1,
+                    })(<Input placeholder="请输入联系人姓名" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="与会员关系">
+                    {getFieldDecorator('contactperson1', {
+
+                      initialValue: current.contactperson1,
+                    })(<Input placeholder="请输入与会员关系" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="手机号">
+                    {getFieldDecorator('remarksphone1', {
+                      rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
+                      initialValue: current.remarksphone1,
+                    })(<Input placeholder="请输入手机号" />)}
+                  </FormItem>
+                </Col>
+              </Row>
+              <Row gutter={24}>
+                <Col {...this.colLayout}>
+                  <FormItem label="联系人3姓名">
+                    {getFieldDecorator('remarkscontact2', {
+
+                      initialValue: current.remarkscontact2,
+                    })(<Input placeholder="请输入联系人姓名" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="与会员关系">
+                    {getFieldDecorator('contactperson2', {
+
+                      initialValue: current.contactperson2,
+                    })(<Input placeholder="请输入与会员关系" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="手机号">
+                    {getFieldDecorator('remarksphone2', {
+                      rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
+                      initialValue: current.remarksphone2,
+                    })(<Input placeholder="请输入手机号" />)}
+                  </FormItem>
+                </Col>
+              </Row>
+            </div>
+
+          </Form>
+        </Spin>
+        <Button type="primary" style={{ position: 'fixed', bottom: '15px', right: '20px' }} onClick={this.validate} loading={loadings}>
+          提交
         </Button>
       </Fragment>
     )

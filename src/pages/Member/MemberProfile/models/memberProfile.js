@@ -1,5 +1,5 @@
 
-import { GetList, startMember, stopMember, batchStartMember, batchStopMember, deleteMember, } from '@/services/memberApi';
+import { GetList, stopMember, batchStartMember, batchStopMember, deleteMember, } from '@/services/memberApi';
 import { message } from 'antd';
 export default {
   namespace: 'memberProfile',
@@ -21,19 +21,7 @@ export default {
         message.error(response.errMsg);
       }
     },
-    *start({ payload, callback }, { call, put }) {
-      const response = yield call(startMember, payload);
-      if (response&&response.errCode === 0) {
-        yield put({
-          type: 'commonResult',
-          payload: response,
-        });
-        message.success('启用成功');
-        if (callback) callback(response);
-      } else {
-        message.error(response.errMsg);
-      }
-    },
+
     *stop({ payload, callback }, { call, put }) {
       const response = yield call(stopMember, payload);
       if (response&&response.errCode === 0) {
