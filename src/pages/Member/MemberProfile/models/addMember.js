@@ -13,7 +13,7 @@ export default {
   effects: {
     *defaultData({ payload }, { call, put }) {
       const response = yield call(toCreatMember, payload);
-      if(!response){return;}
+      
       if (response.errCode === 0) {
         yield put({
           type: 'queryList',
@@ -25,7 +25,7 @@ export default {
     },
     *toUpdate({ payload, callback }, { call, put }) {
       const response = yield call(toUpdateMember, payload);
-      if(!response){return;}
+      
       if(response.errCode === 0) {
         yield put({
           type: 'queryList',
@@ -39,7 +39,7 @@ export default {
 
     *update({ payload, callback }, { call, put }) {
       const response = yield call(updateMember, payload);
-      if(!response){return;}
+      
       if(response.errCode === 0) {
         yield put({
           type: 'commonResult',
@@ -53,7 +53,7 @@ export default {
     },
     *create({ payload, callback }, { call, put }) {
       const response = yield call(creatMember, payload);
-      if(!response){return;}
+      
       if(response.errCode === 0) {
         yield put({
           type: 'commonResult',
@@ -67,7 +67,7 @@ export default {
     },
     *getMemberTags({ payload, callback }, { call, put }) {
       const response = yield call(memberTags, payload);
-      if(!response){return;}
+      
       if (response.errCode === 0) {
         yield put({
           type: 'memberTags',

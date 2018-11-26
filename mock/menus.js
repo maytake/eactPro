@@ -120,7 +120,21 @@ const menus = {
       path: '/rule',
       name: '规则管理',
       icon: 'file-sync',
-      routes: []
+      routes: [
+        {
+          path: '/rule/integralRule',
+          name: '积分成长值规则',
+        },
+        {
+          path: '/rule/memberUpgrade',
+          name: '会员升降级规则',
+        },
+        {
+          path: '/rule/signIn',
+          name: '签到规则',
+        },
+        
+      ]
     },
     {
       path: '/member',

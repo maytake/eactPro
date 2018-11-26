@@ -1,8 +1,9 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import moment from 'moment';
 import router from 'umi/router';
-import { routerRedux } from 'dva/router';
+import Link from 'umi/link';
+import { AddKey } from '@/utils/utils';
+
 import {
     Row,
     Col,
@@ -14,6 +15,7 @@ import {
     message,
     Table,
     Tooltip,
+    Badge,
 } from 'antd';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import styles from './Role.less';
@@ -23,7 +25,7 @@ const { Search } = Input;
 
 @connect(({ role, loading }) => ({
     role,
-    loading: loading.models.role,
+    loading: loading.effects['role/fetchData'],
 }))
 @Form.create()
 class Role extends PureComponent {
@@ -31,48 +33,55 @@ class Role extends PureComponent {
         super(props);
         this.handleSearch = this.handleSearch.bind(this);
         this.state = {
-       
+
         };
     }
 
     componentDidMount() {
+        this.getData();
+    };
+
+    getData(pagination = {}, name) {
         const { dispatch } = this.props;
         dispatch({
             type: 'role/fetchData',
+            payload: {
+                page: pagination.current || 1,
+                pageSize: pagination.pageSize || 10,
+                sortType: "auto",
+                roleName: name,
+            },
         });
     };
 
+    handleTableChange = (pagination) => {
+        this.getData(pagination)
+    };
+
     handleSearch(v) {
-        const { dispatch } = this.props;
-        dispatch({
-          type: 'role/fetchData',
-          payload: { name: v },
-        });
+        this.getData({},v);
         router.push({
-          pathname: '/system/role',
-          query:{name:v}
+            pathname: '/system/role',
+            query: { roleName: v }
         })
-      }
+    }
 
     deleteItem(id) {
         const {
             dispatch,
-          } = this.props;
-          dispatch({
+        } = this.props;
+        dispatch({
             type: 'role/remove',
             payload: {
-              desc: id,
-            },
-            callback: (data) => {
-                message.success(data.msg);
-              },
-          });
+                id,
+            }
+        });
     };
 
-    AddRole(){
-        this.props.dispatch(routerRedux.push({
-            pathname:'/system/role/addrole',
-        }))
+    AddRole() {
+      router.push({
+            pathname: '/system/role/addrole',
+        })
     };
 
     renderForm() {
@@ -98,18 +107,22 @@ class Role extends PureComponent {
     };
 
     render() {
-        const {dispatch, 
-            role:{data}, 
+        const { dispatch,
+            role: { data },
             loading } = this.props;
-        const datas =data.dataSource;
-        if(!datas){return null}
-        const { list, pagination }=datas;
+
+        const { content = [], totalElements, size } = data;
         const paginationProps = {
             showSizeChanger: true,
             showQuickJumper: true,
-            ...pagination,
-          };
+            defaultCurrent: 1,
+            total: totalElements,
+            pageSize: size,
+        };
 
+        if (Object.keys(content).length !== 0) {
+            AddKey(content, 'id');
+        };
         const roleDelete = (key, currentId) => {
             Modal.confirm({
                 title: '删除角色',
@@ -119,42 +132,70 @@ class Role extends PureComponent {
                 onOk: () => this.deleteItem(currentId),
             });
         };
-        const roleEdit=(key, id) => {
-            dispatch(routerRedux.push({
-                pathname:'/system/role/addrole',
-                query:{id}
-            }))
+        const roleEdit = (key, id) => {
+            router.push({
+                pathname: '/system/role/addrole',
+                query: { id }
+            });
         };
-        
+
 
         const columns = [{
             title: '角色名称',
-            dataIndex: 'name',
-            key: 'name',
+            dataIndex: 'roleName',
+            key: 'roleName',
+            render: (text, record) => {
+                const id = record.id
+                return (
+                    <Link to={{
+                        pathname: '/system/role/addrole',
+                        query: { id, view: 'true', }
+                    }}
+                    > {text}
+                    </Link>
+                );
+            },
         }, {
             title: '角色编码',
-            dataIndex: 'code',
-            key: 'code',
+            dataIndex: 'roleCode',
+            key: 'roleCode',
         }, {
             title: '角色类型',
-            dataIndex: 'type',
-            key: 'type',
+            dataIndex: 'roleType',
+            key: 'roleType',
+            render: text => {
+                switch (text) {
+                    case '1':
+                        return '集团运营人员'
+                    case '2':
+                        return '集团管理员'
+                    case '3':
+                        return '4S店管理员'
+                    case '4':
+                        return '4S店服务顾问'
+                    default:
+                        break;
+                }
+            },
         }, {
             title: '角色状态',
-            dataIndex: 'status',
-            key: 'status',
+            dataIndex: 'isActive',
+            key: 'isActive',
+            render: text => {
+                return text === 'Y' ? <Badge status="success" text='启用' /> : <Badge status="default" text="未启用" />;
+            },
         }, {
             title: '操作',
             dataIndex: 'action',
             key: 'action',
-            width:'155px',
+            width: '155px',
             render: (text, record) => (
                 <span>
                     <Tooltip title="编辑">
-                        <Button icon="edit" onClick={({ key }) => roleEdit(key, record.key)} type="primary" style={{marginRight:"8px"}}></Button>
+                        <Button icon="edit" onClick={({ key }) => roleEdit(key, record.key)} type="primary" style={{ marginRight: "8px" }}></Button>
                     </Tooltip>
                     <Tooltip title="删除">
-                        <Button icon="delete" onClick={({ key }) => roleDelete(key, record.key)} type="primary"></Button>
+                        <Button icon="delete" onClick={({ key }) => roleDelete(key, record.id)} type="primary"></Button>
                     </Tooltip>
                 </span>
             ),
@@ -175,12 +216,13 @@ class Role extends PureComponent {
                                 onSearch={this.handleSearch}
                             />
                         </div>
-                        
-                        <Table 
-                            dataSource={list}
-                            pagination={paginationProps} 
-                            columns={columns} 
-                            loading={loading} 
+
+                        <Table
+                            dataSource={content}
+                            pagination={paginationProps}
+                            onChange={this.handleTableChange}
+                            columns={columns}
+                            loading={loading}
                         />
                     </div>
                 </Card>

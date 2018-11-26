@@ -4,23 +4,30 @@ import router from 'umi/router';
 import { Modal } from 'antd';
 
 // judgeExpire
-const postData=async (url, params)=>{
-  const res=request(url, {
-    method: 'POST',
-    body: {
-      ...params,
-    },
+const postData = async (url, params) => {
+  const res = request(url, {
+      method: 'POST',
+      body: {
+          ...params,
+      },
   });
   const judgeExpire = await res;
-  if(judgeExpire&&judgeExpire.errCode===1){
-    Modal.info({
-      title: '用户信息已过期，请返回登录',
-      onOk() {
-        router.push('/user/login');
-      },
-    });
+  if (judgeExpire && judgeExpire.errCode === 1) {
+      Modal.info({
+          title: '用户信息已过期，请返回登录',
+          onOk() {
+              router.push('/user/login');
+          },
+      });
   }
-  return res;
+  const err = new Promise((resolve) => {
+      resolve({
+          errCode: 2,
+          errMsg: '接口出问题了',
+      })
+  });
+
+  return judgeExpire&&res||err;
 }
 
 // menu

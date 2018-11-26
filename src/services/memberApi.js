@@ -4,23 +4,30 @@ import router from 'umi/router';
 import { Modal } from 'antd';
 
 // judgeExpire
-const postData=async (url, params)=>{
-  const res=request(url, {
-    method: 'POST',
-    body: {
-      ...params,
-    },
+const postData = async (url, params) => {
+  const res = request(url, {
+      method: 'POST',
+      body: {
+          ...params,
+      },
   });
   const judgeExpire = await res;
-  if(judgeExpire&&judgeExpire.errCode===1){
-    Modal.info({
-      title: '用户信息已过期，请返回登录',
-      onOk() {
-        router.push('/user/login');
-      },
-    });
+  if (judgeExpire && judgeExpire.errCode === 1) {
+      Modal.info({
+          title: '用户信息已过期，请返回登录',
+          onOk() {
+              router.push('/user/login');
+          },
+      });
   }
-  return res;
+  const err = new Promise((resolve) => {
+      resolve({
+          errCode: 2,
+          errMsg: '接口出问题了',
+      })
+  });
+
+  return judgeExpire&&res||err;
 }
 
 // member
@@ -90,4 +97,31 @@ export async function setCar(params) {
   return postData('/CRM/mbe3/mgrMembermgcar/turnDefault.json', params);
 }
 
+// addCarInfo
+export async function toCarUpdata(params) {
+  return postData('/CRM/mbe3/mgrMembermgcar/toUpdate.json', params);
+}
 
+export async function carUpdata(params) {
+  return postData('/CRM/mbe3/mgrMembermgcar/update.json', params);
+}
+
+export async function getBrand(params) {
+  return postData('/CRM/mbe3/mgrBrand/page.json', params);
+}
+
+export async function getCars(params) {
+  return postData('/CRM/mbe3/mgrCarseries/page.json', params);
+}
+
+export async function getModels(params) {
+  return postData('/CRM/mbe3/mgrCartype/page.json', params);
+}
+
+export async function getShops(params) {
+  return postData('/CRM/mbe3/mgrFourspointmg/page.json', params);
+}
+
+export async function getConsultant(params) {
+  return postData('/CRM/mbe3/mgrAccount/page.json', params);
+}

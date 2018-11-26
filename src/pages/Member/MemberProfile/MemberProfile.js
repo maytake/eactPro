@@ -46,7 +46,7 @@ class MemberProfile extends PureComponent {
     this.getData();
   };
 
-  getData(params){
+  getData(){
     const { dispatch } = this.props;
     dispatch({
       type: 'memberProfile/fetchData',
@@ -232,7 +232,7 @@ class MemberProfile extends PureComponent {
         render: (text, record) => {
             const id =record.pkMembermgcust
             return (
-                <Link to={{ pathname :`${match.url}/addMember/memberInfo`, query: { id }}}> {text }</Link>
+                <Link to={{ pathname :`${match.url}/addMember/memberInfo`, query: { id, view:'true', }}}> {text }</Link>
             );
         },
       },

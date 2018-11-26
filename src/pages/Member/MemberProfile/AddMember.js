@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'dva';
-import { Card,Button, Modal  } from 'antd';
+import { Card,Button, Modal, Spin,  } from 'antd';
 import router from 'umi/router';
 import PageHeaderWrapper from '@/components/PageHeaderWrapper';
 import DescriptionList from '@/components/DescriptionList';
@@ -101,8 +101,7 @@ class AddMember extends PureComponent {
       addMemberProfile:{dataSource},
       match,
       location, } = this.props;
-    if(Object.keys(dataSource).length===0){return null;}
-    const entity = dataSource.entity;
+    const entity = dataSource.entity||{};
     const operationTabList = [
       {
         key: 'memberInfo',
@@ -144,6 +143,7 @@ class AddMember extends PureComponent {
 
     return (
       <PageHeaderWrapper>
+        <Spin spinning={listLoading}>
         <section className={styles.memberInfo}>
           <main className="member-header">
             <div className="member-portrait"> 
@@ -179,6 +179,7 @@ class AddMember extends PureComponent {
             {children}
           </Card>
         </section>
+        </Spin>
       </PageHeaderWrapper>
     );
   }

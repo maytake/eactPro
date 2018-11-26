@@ -1,73 +1,55 @@
-import { getRoleList, AddRoleList, RemoveRoleList, getRoleUpdate } from '@/services/getApi';
-
+import { getRoleList, RemoveRoleList } from '@/services/roleApi';
+import { message } from 'antd';
 export default {
   namespace: 'role',
-
   state: {
-    updateResult:{},
-    addResult: {},
-    reomveResult: {},
     data: {},
+    commonResult: {},
   },
 
   effects: {
-    *fetchData({ payload }, { call, put }) {
+    *fetchData({ payload, callback }, { call, put }) {
       const response = yield call(getRoleList, payload);
-      yield put({
-        type: 'queryList',
-        payload: response,
-      });
+      if (response.errCode === 0) {
+        yield put({
+          type: 'queryList',
+          payload: response,
+        });
+        if (callback) callback(response);
+      } else {
+        message.error(response.errMsg);
+      }
     },
-    *add({ payload, callback }, { call, put }) {
-      const response = yield call(AddRoleList, payload);
-      yield put({
-        type: 'queryList',
-        payload: response,
-      });
-      if (callback) callback(response);
-    },
+
     *remove({ payload, callback }, { call, put }) {
       const response = yield call(RemoveRoleList, payload);
-      yield put({
-        type: 'queryList',
-        payload: response,
-      });
-      if (callback) callback(response);
+      if (response.errCode === 0) {
+        yield put({
+          type: 'commonResult',
+          payload: response,
+        });
+        message.success('删除成功！');
+        if (callback) callback(response);
+      } else {
+        message.error(response.errMsg);
+      }
     },
-    *getUpdate({ payload, callback }, { call, put }) {
-      const response = yield call(getRoleUpdate, payload);
-      yield put({
-        type: 'getUpdateList',
-        payload: response,
-      });
-      if (callback) callback(response);
-    },
+
   },
 
   reducers: {
+    commonResult(state, { payload }) {
+      return {
+        ...state,
+        commonResult: payload,
+      };
+    },
     queryList(state, { payload }) {
       return {
         ...state,
-        data: payload,
+        data: payload.data||{},
       };
     },
-    getUpdateList(state, { payload }) {
-      return {
-        ...state,
-        updateResult: payload,
-      };
-    },
-    addList(state, { payload }) {
-      return {
-        ...state,
-        addResult: payload,
-      };
-    },
-    removeList(state, { payload }) {
-      return {
-        ...state,
-        reomveResult: payload,
-      };
-    },
+
   },
 };

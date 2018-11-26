@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { Table, Modal, Input, Form, Button, Row } from 'antd';
-
+import isEqual from 'lodash/isEqual';
 const FormItem = Form.Item;
 
 @Form.create()
@@ -10,43 +10,64 @@ class SearchModel extends PureComponent {
     this.state = {
       selectedRows: [],
       selectedRowKeys: props.selectedKeys,
+      columns:props.columns,
     };
   }
 
+  static getDerivedStateFromProps(nextProps, preState) {
+    if (isEqual(nextProps.columns, preState.columns)) {
+      return null;
+    }
+    return {
+      columns:nextProps.columns,
+    };
+  }
 
   render() {
-    const { selectedRowKeys, selectedRows } = this.state;
-    const {modelKey} = this.props;
+    const { selectedRowKeys, columns, selectedRows } = this.state;
     const {
-      columns,
       tableData,
       modalVisible,
       handleAdd,
+      handleSearch,
+      handleTableChange,
       handleModalVisible,
       form: { getFieldDecorator },
+      tableLoading,
+      selectionType,
+      total,
+      pageSize,
     } = this.props;
 
     const paginationProps = {
       showSizeChanger: true,
       showQuickJumper: true,
-      defaultCurrent: 2,
-      total: 100,
-      pageSize: 10,
+      total: Number(total),
+      pageSize: Number(pageSize),
+      defaultCurrent: 1,
     };
 
     const okHandle = () => {
-      handleAdd({selectedRows,modelKey});
+      handleAdd({selectedRows});
     };
+    
+    const validateSearch=(e)=>{
+      e.preventDefault();
+      const { form } = this.props;
+      form.validateFields((err, fieldsValue) => {
+          if (err) return;
+          handleSearch(fieldsValue);
+      });
+    }
 
     const rowSelection = {
-     
+      type:selectionType,
       onChange: (_selectedRowKeys, _selectedRows) => {
         this.setState({
           selectedRowKeys:_selectedRowKeys,
           selectedRows:_selectedRows,
         });
       },
-     
     };
 
     return (
@@ -59,9 +80,9 @@ class SearchModel extends PureComponent {
         onOk={okHandle}
         onCancel={() => handleModalVisible()}
       >
-        <Form onSubmit={this.handleSearch} layout="inline">
+        <Form onSubmit={validateSearch} layout="inline">
           <Row style={{ textAlign: 'right', marginBottom: '16px' }}>
-            <FormItem>{getFieldDecorator('code ')(<Input placeholder="编号" />)}</FormItem>
+            <FormItem style={{display:'none'}}>{getFieldDecorator('code')(<Input placeholder="编号" />)}</FormItem>
             <FormItem>{getFieldDecorator('name')(<Input placeholder="姓名" />)}</FormItem>
             <FormItem>
               <Button type="primary" htmlType="submit">
@@ -72,10 +93,12 @@ class SearchModel extends PureComponent {
         </Form>
 
         <Table
+          loading={tableLoading}
           rowSelection={rowSelection}
           columns={columns}
           dataSource={tableData}
           pagination={paginationProps}
+          onChange={handleTableChange}
           size="small"
         />
       </Modal>

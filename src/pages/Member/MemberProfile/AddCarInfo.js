@@ -9,36 +9,35 @@ import {
   Input,
   Select,
   Spin,
-  Icon,
+  message,
 } from 'antd';
-import SearchCool from '@/components/SearchCool'
+
+import router from 'umi/router';
 import moment from 'moment';
 import { connect } from 'dva';
-import Link from 'umi/link';
-import router from 'umi/router';
+import SearchCool from '@/components/SearchCool'
+import SearchModel from '@/components/SearchModel';
+import { AddKey } from '@/utils/utils';
 import styles from './MemberInfo.less';
 
-const Search = Input.Search;
+
+
 const FormItem = Form.Item;
 const { Option } = Select;
 const { TextArea } = Input;
 
 
-@connect(({ user, addMemberProfile, loading }) => ({
-  currentUser: user.currentUser,
-  addMemberProfile,
-  loadings: loading.models.addMemberProfile,
+@connect(({ addCarInfo, carInfoSelect, loading }) => ({
+  addCarInfo,
+  carInfoSelect,
+  loadings: loading.models.addCarInfo,
+  tableLoading: loading.models.carInfoSelect,
 }))
 @Form.create()
 class AddCarInfo extends PureComponent {
   colLayout = {
     xl: 6,
-    md: 12,
-    sm: 24,
-  };
-
-  colLayout4 = {
-    xl: 6,
+    lg: 8,
     md: 12,
     sm: 24,
   };
@@ -46,37 +45,142 @@ class AddCarInfo extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-
+      modalVisible: false,
+      columns: [],
+      carData: [],
+      modelKey: '',
+      selectionType: 'radio',
+      selectedKeys: [],
+      
+      total: '',
+      pageSize: '',
     }
+    this.formData={};
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleTableChange = this.handleTableChange.bind(this);
   }
+
+  componentDidMount() {
+    const { dispatch, location } = this.props;
+    const carId = location.query.carId;
+    dispatch({
+      type: 'addCarInfo/toUpdate',
+      payload: {
+        pkMembermgcar: carId,
+      }
+    });
+  }
+
+  getSearchData(pageParams, searchParams) {
+    const { type, category } = searchParams;
+    const { dispatch } = this.props;
+    const isConsultant = category === 'zsservicename';
+    const column = [
+      {
+        title: isConsultant ? '登录名称' : '编码',
+        width: 135,
+        dataIndex: isConsultant ? 'loginName' : 'code',
+        sorter: true,
+      },
+      {
+        title: '名称',
+        dataIndex: 'name',
+        sorter: (a, b) => {
+          return a.name.localeCompare(b.name, 'zh-CN');
+        },
+      },
+      {
+        title: '描述',
+        dataIndex: 'description',
+        sorter: (a, b) => {
+          return a.description.localeCompare(b.description, 'zh-CN');
+        },
+        render: text => {
+          return (
+            <div className={styles.noWrap} style={{ width: '400px' }}>{text}</div>
+          )
+        },
+      },
+    ];
+
+    dispatch({
+      type: `carInfoSelect/${type}`,
+      payload: pageParams,
+      callback: (obj) => {
+        this.setState({
+          columns: column,
+          carData: obj.data && obj.data.content,
+          total: obj.data && obj.data.totalElements,
+          pageSize: obj.data && obj.data.size,
+          modelKey: category,
+        })
+      }
+    });
+  }
+
+
+  handleTableChange = (pagination) => {
+    const { modelKey } = this.state;
+    this.searchDifType(modelKey, pagination);
+  };
+
+
+  handleModalVisible = flag => {
+    this.setState({
+      modalVisible: !!flag,
+    });
+  };
 
   validate = (e) => {
     e.preventDefault();
     const {
       form: { validateFieldsAndScroll },
       dispatch,
-      addMemberProfile: { dataSource },
+      location,
+      addCarInfo: { entityData },
     } = this.props;
-    const entity = Object.keys(dataSource).length !== 0 && dataSource.entity;
+    const id = location.query.id;
+    const entity = Object.keys(entityData).length !== 0 && entityData.entity;
     validateFieldsAndScroll((error, values) => {
       if (!error) {
+        const {
+          beforedate,
+          beforemaintaindate,
+          firstCertifyLicense,
+          firstStartTime,
+          insurance,
+          lastInsureTime,
+          nextmaintaindate,
+          njstopdate,
+          saledate,
+          warrantydate,
+        } = values;
         const newData = {
           ...values,
-
+          beforedate: beforedate && beforedate.format('YYYY-MM-DD HH:mm:ss'),
+          beforemaintaindate: beforemaintaindate && beforemaintaindate.format('YYYY-MM-DD HH:mm:ss'),
+          firstCertifyLicense: firstCertifyLicense && firstCertifyLicense.format('YYYY-MM-DD HH:mm:ss'),
+          firstStartTime: firstStartTime && firstStartTime.format('YYYY-MM-DD HH:mm:ss'),
+          insurance: insurance && insurance.format('YYYY-MM-DD HH:mm:ss'),
+          lastInsureTime: lastInsureTime && lastInsureTime.format('YYYY-MM-DD HH:mm:ss'),
+          nextmaintaindate: nextmaintaindate && nextmaintaindate.format('YYYY-MM-DD HH:mm:ss'),
+          njstopdate: njstopdate && njstopdate.format('YYYY-MM-DD HH:mm:ss'),
+          saledate: saledate && saledate.format('YYYY-MM-DD HH:mm:ss'),
+          warrantydate: warrantydate && warrantydate.format('YYYY-MM-DD HH:mm:ss'),
         };
-        const params = { ...entity, ...newData, }
-        console.log(params)
+        const params = { ...entity, ...newData, };
+        console.log(JSON.stringify(entity));
+        console.log(JSON.stringify(params));
+        // console.log(params);
         dispatch({
-          type: 'addMemberProfile/update',
+          type: 'addCarInfo/update',
           payload: {
             ...params
           },
           callback: () => {
-            dispatch({
-              type: 'addMemberProfile/toUpdate',
-              payload: {
-                pkMembermgcust: entity.pkMembermgcust,
-              }
+            router.push({
+              pathname: '/member/memberProfile/addMember/carInfo',
+              query: { id }
             });
           }
         });
@@ -85,27 +189,148 @@ class AddCarInfo extends PureComponent {
     });
   };
 
-  enterBtn=(values, type)=>{
-    console.log(values)
+  searchDifType(type, pagination = {}, searchParams = {}) {
+    const { brandname, carseriesname, belongfour } = this.formData;
+    this.setState({
+      carData: [],
+    });
+    let params = {};
+    switch (type) {
+      case 'brandname':
+        params = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          sortType: "auto",
+          name: searchParams.name,
+        }
+        this.getSearchData(params, { type: 'getCarBrand', category: 'brandname' });
+        break;
+      case 'carseriesname':
+        params = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          sortType: "auto",
+          brandname,
+          name: searchParams.name,
+        }
+        this.getSearchData(params, { type: 'getCarsInfo', category: 'carseriesname' });
+        break;
+      case 'cartypename':
+        params = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          sortType: "auto",
+          brandname,
+          carseriesname,
+          name: searchParams.name,
+        }
+        this.getSearchData(params, { type: 'getCarsModels', category: 'cartypename' });
+        break;
+      case 'belongfourname':
+        params = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          sortType: "auto",
+          name: searchParams.name,
+        }
+        this.getSearchData(params, { type: 'getCarsShops', category: 'belongfourname' });
+        break;
+      case 'fours':
+        params = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          sortType: "auto",
+          name: searchParams.name,
+        }
+        this.getSearchData(params, { type: 'getCarsShops', category: 'fours' });
+        break;
+      case 'zsservicename':
+        params = {
+          page: pagination.current || 1,
+          pageSize: pagination.pageSize || 10,
+          sortType: "auto",
+          fours: belongfour, // 根据4S店id搜索
+          name: searchParams.name,
+        }
+        this.getSearchData(params, { type: 'getCarsConsultant', category: 'zsservicename' });
+        break;
+      default:
+        break;
+    }
+  }
+
+  enterBtn(value, name, ) {
+    this.searchDifType(name);
+    this.handleModalVisible(true);
+  }
+
+  handleSearch(v) {
+    const { modelKey } = this.state;
+    this.searchDifType(modelKey, {}, v);
   }
 
   render() {
+    const { modalVisible, columns, carData, modelKey, selectedKeys, selectionType, total, pageSize } = this.state;
     const {
       form: { getFieldDecorator },
-      match,
+      location,
       loadings,
-      addMemberProfile: { dataSource },
+      tableLoading,
+      addCarInfo: { entityData },
     } = this.props;
-    if (Object.keys(dataSource).length === 0) { return null; }
-    const entity = dataSource.entity;
+    const isView = location.query.view&&true||false;
+    if (Object.keys(entityData).length === 0) { return null; }
+    const entity = entityData.entity;
     const current = entity || {};
+    const tableData = AddKey(carData, 'erpId');
 
-    const getOption = (data = [], name) => {
-      return data.map((item, i) => (
-        <Option key={item[name]} value={item[name]}>
-          {item[name]}
-        </Option>
-      ));
+    const getNameOrId = (d,n)=>{
+      return d.map( item => item[n] ).filter(i => i);
+    }
+    
+    const handleAdd = (obj) => {
+      const { selectedRows } = obj;
+      if (selectedRows.length !== 0) {
+        const v =getNameOrId(selectedRows, 'name');
+        current[modelKey] = v && v.join(',');
+
+        switch (modelKey) {
+          case 'brandname':
+          current.pkCarbrand = selectedRows[0].pkBrand
+          break;
+          case 'carseriesname':
+          current.pkCarseries = selectedRows[0].pkCarseriesmg
+          break;
+          case 'cartypename':
+          current.pkCartype = selectedRows[0].pkCartype
+          break;
+          case 'belongfourname':
+            current.belongfour = selectedRows[0].pkFourspointmg
+          break;
+          case 'fours':
+          current.salefours = selectedRows[0].pkFourspointmg
+          break;
+          case 'zsservicename':
+          current.zsservice = selectedRows[0].id
+          break;
+          default:
+          break;
+        }
+        this.handleModalVisible();
+      } else {
+        message.success('还没有选择选项');
+      }
+    }
+    this.formData =current;
+
+    const parentMethods = {
+      handleAdd,
+      handleSearch: this.handleSearch,
+      handleModalVisible: this.handleModalVisible,
+      handleTableChange: this.handleTableChange,
+    };
+    const parentProps = {
+      columns, tableData, modelKey, selectedKeys, tableLoading, selectionType, total, pageSize
     }
 
     return (
@@ -127,7 +352,10 @@ class AddCarInfo extends PureComponent {
                         { required: true, message: '请输入车牌号!' },
                         { pattern: /^[京津沪渝冀豫云辽黑湘皖鲁新苏浙赣鄂桂甘晋蒙陕吉闽贵粤青藏川宁琼使领A-Z]{1}[A-Z]{1}[A-Z0-9]{4}[A-Z0-9挂学警港澳]{1}$/, message: '输入的车牌号有误！' }],
                       initialValue: current.licenseplate,
-                    })(<Input placeholder="请输入车牌号" />)}
+                    })(<Input
+                      disabled={isView}
+                      placeholder="请输入车牌号"
+                    />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -135,7 +363,7 @@ class AddCarInfo extends PureComponent {
                     {getFieldDecorator('carframeno', {
                       rules: [{ required: true, message: '请输入车架号!' }],
                       initialValue: current.carframeno,
-                    })(<Input placeholder="请输入车架号" />)}
+                    })(<Input disabled={isView} placeholder="请输入车架号" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -143,24 +371,24 @@ class AddCarInfo extends PureComponent {
                     {getFieldDecorator('engineno', {
                       rules: [{ required: true, message: '请输入发动机号!' }],
                       initialValue: current.engineno,
-                    })(<Input placeholder="请输入发动机号" />)}
+                    })(<Input disabled={isView} placeholder="请输入发动机号" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="车辆状态">
                     {getFieldDecorator('vstatus', {
                       rules: [{ required: true, message: '请选择原因!' }],
-                      initialValue: current.vstatus,
+                      initialValue: !!current.vstatus && String(current.vstatus) || null,
                     })(
                       <Select
+                        disabled={isView}
                         allowClear
                         style={{ width: '100%' }}
                         placeholder="请选择原因!"
                       >
-                        <Option value="APP中删除车辆">APP中删除车辆</Option>
-                        <Option value="微信中中删除车辆">微信中中删除车辆</Option>
-                        <Option value="后台停用车辆">后台停用车辆</Option>
-                        <Option value="车辆过户">车辆过户</Option>
+                        <Option value="0">未开通</Option>
+                        <Option value="1">已启用</Option>
+                        <Option value="2">已停用</Option>
                       </Select>
                     )}
                   </FormItem>
@@ -170,14 +398,14 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="品牌">
                     {getFieldDecorator('brandname', {
-                      rules: [{ required: true, message: '请输入联系人姓名!' }],
-                      initialValue: 'current.brandname',
+                      rules: [{ required: true, message: '请选择品牌!' }],
+                      initialValue: current.brandname,
                     })(
                       <SearchCool
-                        placeholder="请输入联系人姓名!"
+                        placeholder="请选择品牌!"
                         inputDisabled
-                        buttonDisabled={false}
-                        enterHandle={value => this.enterBtn(value, 'carseriesname')}
+                        buttonDisabled={isView}
+                        enterHandle={value => this.enterBtn(value, 'brandname')}
                       />
                     )}
                   </FormItem>
@@ -185,13 +413,13 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="车系">
                     {getFieldDecorator('carseriesname', {
-                      rules: [{ required: true, message: '请输入与会员关系!' }],
-                      initialValue: current.carseri,
+                      rules: [{ required: true, message: '请选择车系!' }],
+                      initialValue: current.carseriesname,
                     })(
                       <SearchCool
-                        placeholder="请输入与会员关系!"
+                        placeholder="请选择车系!"
                         inputDisabled
-                        buttonDisabled={false}
+                        buttonDisabled={isView}
                         enterHandle={value => this.enterBtn(value, 'carseriesname')}
                       />
                     )}
@@ -200,9 +428,16 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="车型">
                     {getFieldDecorator('cartypename', {
-                      rules: [{ required: true, message: '请输入手机号!' }],
-                      initialValue: 'current.cartypename',
-                    })(<Input placeholder="请输入手机号" />)}
+                      rules: [{ required: true, message: '请选择车型!' }],
+                      initialValue: current.cartypename,
+                    })(
+                      <SearchCool
+                        placeholder="请选择车型!"
+                        inputDisabled
+                        buttonDisabled={isView}
+                        enterHandle={value => this.enterBtn(value, 'cartypename')}
+                      />
+                    )}
                   </FormItem>
                 </Col>
 
@@ -211,15 +446,18 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="用车类型">
                     {getFieldDecorator('useType', {
-                      initialValue: current.useType,
+                      initialValue: !!current.useType && String(current.useType) || null,
                     })(
                       <Select
+                        disabled={isView}
                         allowClear
                         placeholder="请选择用车类型"
                         onChange={this.handleSelectChange}
                       >
-                        <Option value="Y">启用</Option>
-                        <Option value="N">停用</Option>
+                        <Option value="企业用车">企业用车</Option>
+                        <Option value="出租车">出租车</Option>
+                        <Option value="私家用车">私家用车</Option>
+                        <Option value="其他">其他</Option>
                       </Select>
                     )}
                   </FormItem>
@@ -229,14 +467,14 @@ class AddCarInfo extends PureComponent {
                     {getFieldDecorator('appearancecolorname', {
 
                       initialValue: current.appearancecolorname,
-                    })(<Input placeholder="请输入车身色" />)}
+                    })(<Input disabled={isView} placeholder="请输入车身色" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="内饰色">
                     {getFieldDecorator('interiorcolorname', {
                       initialValue: current.interiorcolorname,
-                    })(<Input placeholder="请输入内饰色" />)}
+                    })(<Input disabled={isView} placeholder="请输入内饰色" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -244,7 +482,7 @@ class AddCarInfo extends PureComponent {
                     {getFieldDecorator('carroofcolorname', {
 
                       initialValue: current.carroofcolorname,
-                    })(<Input placeholder="请输入车顶色" />)}
+                    })(<Input disabled={isView} placeholder="请输入车顶色" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -255,23 +493,34 @@ class AddCarInfo extends PureComponent {
                     {getFieldDecorator('belongfourname', {
                       initialValue: current.belongfourname,
                     })(
-                      <Input placeholder="请输入归属4S店" />
+                      <SearchCool
+                        placeholder="请选择归属4S店!"
+                        inputDisabled
+                        buttonDisabled={isView}
+                        enterHandle={value => this.enterBtn(value, 'belongfourname')}
+                      />
                     )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="绑定服务顾问">
                     {getFieldDecorator('zsservicename', {
-
                       initialValue: current.zsservicename,
-                    })(<Input placeholder="请输入绑定服务顾问" />)}
+                    })(
+                      <SearchCool
+                        placeholder="请选择绑定服务顾问!"
+                        inputDisabled
+                        buttonDisabled={isView}
+                        enterHandle={value => this.enterBtn(value, 'zsservicename')}
+                      />
+                    )}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="首次绑定4S店">
                     {getFieldDecorator('foursshopName', {
                       initialValue: current.foursshopName,
-                    })(<Input placeholder="请输入首次绑定4S店" />)}
+                    })(<Input disabled={isView} placeholder="请输入首次绑定4S店" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -280,6 +529,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.firstStartTime ? moment(current.firstStartTime) : null,
                     })(
                       <DatePicker
+                        disabled={isView}
                         showTime
                         placeholder="请选择"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -296,7 +546,12 @@ class AddCarInfo extends PureComponent {
                     {getFieldDecorator('fours', {
                       initialValue: current.fours,
                     })(
-                      <Input placeholder="请输入归属4S店" />
+                      <SearchCool
+                        placeholder="请选择销售4S店!"
+                        inputDisabled
+                        buttonDisabled={isView}
+                        enterHandle={value => this.enterBtn(value, 'fours')}
+                      />
                     )}
                   </FormItem>
                 </Col>
@@ -306,6 +561,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.saledate ? moment(current.saledate) : null,
                     })(
                       <DatePicker
+                        disabled={isView}
                         showTime
                         placeholder="请选择销售日期"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -320,6 +576,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.firstCertifyLicense ? moment(current.firstCertifyLicense) : null,
                     })(
                       <DatePicker
+                        disabled={isView}
                         showTime
                         placeholder="请选择行驶证注册登记日期"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -332,15 +589,16 @@ class AddCarInfo extends PureComponent {
                   <FormItem label="数据来源">
                     {getFieldDecorator('source', {
 
-                      initialValue: current.source,
+                      initialValue: current.source || '0',
                     })(
                       <Select
+                        disabled
                         allowClear
                         placeholder="请选择数据来源"
                         onChange={this.handleSelectChange}
                       >
-                        <Option value="Y">启用</Option>
-                        <Option value="N">停用</Option>
+                        <Option value="0">新数据</Option>
+                        <Option value="1">历史数据</Option>
                       </Select>
                     )}
                   </FormItem>
@@ -362,6 +620,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.insurance ? moment(current.insurance) : null,
                     })(
                       <DatePicker
+                        disabled={isView}
                         showTime
                         placeholder="请选择保险到期时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -376,6 +635,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.njstopdate ? moment(current.njstopdate) : null,
                     })(
                       <DatePicker
+                        disabled
                         showTime
                         placeholder="请选择年检到期时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -390,6 +650,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.lastInsureTime ? moment(current.lastInsureTime) : null,
                     })(
                       <DatePicker
+                        disabled={isView}
                         showTime
                         placeholder="请选择上次投保时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -402,7 +663,7 @@ class AddCarInfo extends PureComponent {
                   <FormItem label="上次投保保险公司">
                     {getFieldDecorator('insurancecompanyname', {
                       initialValue: current.insurancecompanyname,
-                    })(<Input placeholder="请输入上次投保保险公司" />)}
+                    })(<Input disabled={isView} placeholder="请输入上次投保保险公司" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -413,6 +674,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.warrantydate ? moment(current.warrantydate) : null,
                     })(
                       <DatePicker
+                        disabled={isView}
                         showTime
                         placeholder="请选择质保到期时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -424,22 +686,22 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="质保到期里程">
                     {getFieldDecorator('warrantykm', {
-                      initialValue: current.warrantykm ? moment(current.warrantykm) : null,
-                    })(<Input placeholder="请输入质保到期里程" />)}
+                      initialValue: current.warrantykm,
+                    })(<Input disabled={isView} placeholder="请输入质保到期里程" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="延保产品名称">
                     {getFieldDecorator('yanbaoProductName', {
                       initialValue: current.yanbaoProductName ? moment(current.yanbaoProductName) : null,
-                    })(<Input placeholder="请输入延保产品名称" />)}
+                    })(<Input disabled={isView} placeholder="请输入延保产品名称" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="延保到期里程">
                     {getFieldDecorator('yanbaoDeadlineMileage', {
                       initialValue: current.yanbaoDeadlineMileage,
-                    })(<Input placeholder="请输入延保到期里程" />)}
+                    })(<Input disabled={isView} placeholder="请输入延保到期里程" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -451,6 +713,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.beforedate ? moment(current.beforedate) : null,
                     })(
                       <DatePicker
+                      disabled={isView}
                         showTime
                         placeholder="请选择上次进站时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -463,7 +726,7 @@ class AddCarInfo extends PureComponent {
                   <FormItem label="上次进站里程">
                     {getFieldDecorator('beforekm', {
                       initialValue: current.beforekm,
-                    })(<Input placeholder="请输入上次进站里程" />)}
+                    })(<Input disabled={isView} placeholder="请输入上次进站里程" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -472,6 +735,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.beforemaintaindate ? moment(current.beforemaintaindate) : null,
                     })(
                       <DatePicker
+                      disabled={isView}
                         showTime
                         placeholder="请选择上次保养时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -484,7 +748,7 @@ class AddCarInfo extends PureComponent {
                   <FormItem label="上次保养里程">
                     {getFieldDecorator('beforemaintainkm', {
                       initialValue: current.beforemaintainkm,
-                    })(<Input placeholder="请输入上次保养里程" />)}
+                    })(<Input disabled={isView} placeholder="请输入上次保养里程" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -496,6 +760,7 @@ class AddCarInfo extends PureComponent {
                       initialValue: current.nextmaintaindate ? moment(current.nextmaintaindate) : null,
                     })(
                       <DatePicker
+                      disabled={isView}
                         showTime
                         placeholder="请选择下次预计保养到期时间"
                         format="YYYY-MM-DD HH:mm:ss"
@@ -508,7 +773,7 @@ class AddCarInfo extends PureComponent {
                   <FormItem label="下次预计保养到期里程">
                     {getFieldDecorator('nextmaintainkm', {
                       initialValue: current.nextmaintainkm,
-                    })(<Input placeholder="请输入下次预计保养到期里程" />)}
+                    })(<Input disabled={isView} placeholder="请输入下次预计保养到期里程" />)}
                   </FormItem>
                 </Col>
 
@@ -527,9 +792,10 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="车辆关系">
                     {getFieldDecorator('masterrelationship', {
-                      initialValue: current.masterrelationship || '1',
+                      initialValue: !!current.relationList.masterrelationship && String(current.relationList.masterrelationship) || '1',
                     })(
                       <Select
+                        disabled
                         allowClear
                         placeholder="请选择车辆关系"
                       >
@@ -543,23 +809,23 @@ class AddCarInfo extends PureComponent {
                 <Col {...this.colLayout}>
                   <FormItem label="会员编码">
                     {getFieldDecorator('mastercode', {
-                      initialValue: current.mastercode ? moment(current.firstStartTime) : null,
-                    })(<Input placeholder="请输入会员编码" />)}
+                      initialValue: current.relationList.mastercode ,
+                    })(<Input disabled={isView} placeholder="请输入会员编码" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="会员姓名">
                     {getFieldDecorator('mastername', {
-                      initialValue: current.mastername ? moment(current.firstStartTime) : null,
-                    })(<Input placeholder="请输入会员姓名" />)}
+                      initialValue: current.relationList.mastername ,
+                    })(<Input disabled={isView} placeholder="请输入会员姓名" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="手机号">
                     {getFieldDecorator('masterphone', {
                       rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
-                      initialValue: current.masterphone,
-                    })(<Input placeholder="请输入手机号" />)}
+                      initialValue: current.relationList.masterphone,
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -567,10 +833,11 @@ class AddCarInfo extends PureComponent {
               <Row gutter={24}>
                 <Col {...this.colLayout}>
                   <FormItem label="车辆关系">
-                    {getFieldDecorator('masterrelationship1', {
-                      initialValue: current.masterrelationship1 || '1',
+                    {getFieldDecorator('repairrelationship1', {
+                      initialValue: !!current.relationList.repairrelationship1 && String(current.relationList.repairrelationship1) || '2',
                     })(
                       <Select
+                        disabled
                         allowClear
                         placeholder="请选择车辆关系"
                       >
@@ -583,24 +850,24 @@ class AddCarInfo extends PureComponent {
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="会员编码">
-                    {getFieldDecorator('mastercode1', {
-                      initialValue: current.mastercode1 ? moment(current.firstStartTime) : null,
-                    })(<Input placeholder="请输入会员编码" />)}
+                    {getFieldDecorator('repaircode1', {
+                      initialValue: current.relationList.repaircode1,
+                    })(<Input disabled={isView} placeholder="请输入会员编码" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="会员姓名">
-                    {getFieldDecorator('mastername1', {
-                      initialValue: current.mastername1 ? moment(current.firstStartTime) : null,
-                    })(<Input placeholder="请输入会员姓名" />)}
+                    {getFieldDecorator('repairname1', {
+                      initialValue: current.relationList.repairname1,
+                    })(<Input disabled={isView} placeholder="请输入会员姓名" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="手机号">
-                    {getFieldDecorator('masterphone1', {
+                    {getFieldDecorator('repairphone1', {
                       rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
-                      initialValue: current.masterphone1,
-                    })(<Input placeholder="请输入手机号" />)}
+                      initialValue: current.relationList.repairphone1,
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -608,10 +875,11 @@ class AddCarInfo extends PureComponent {
               <Row gutter={24}>
                 <Col {...this.colLayout}>
                   <FormItem label="车辆关系">
-                    {getFieldDecorator('masterrelationship2', {
-                      initialValue: current.masterrelationship2 || '1',
+                    {getFieldDecorator('repairrelationship2', {
+                      initialValue: !!current.relationList.repairrelationship2 && String(current.relationList.repairrelationship2) || '2',
                     })(
                       <Select
+                        disabled
                         allowClear
                         placeholder="请选择车辆关系"
                       >
@@ -624,41 +892,89 @@ class AddCarInfo extends PureComponent {
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="会员编码">
-                    {getFieldDecorator('mastercode2', {
-                      initialValue: current.mastercode2 ? moment(current.firstStartTime) : null,
-                    })(<Input placeholder="请输入会员编码" />)}
+                    {getFieldDecorator('repaircode2', {
+                      initialValue: current.relationList.repaircode2,
+                    })(<Input disabled={isView} placeholder="请输入会员编码" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="会员姓名">
-                    {getFieldDecorator('mastername2', {
-                      initialValue: current.mastername2 ? moment(current.firstStartTime) : null,
-                    })(<Input placeholder="请输入会员姓名" />)}
+                    {getFieldDecorator('repairname2', {
+                      initialValue: current.relationList.repairname2,
+                    })(<Input disabled={isView} placeholder="请输入会员姓名" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
                   <FormItem label="手机号">
-                    {getFieldDecorator('masterphone2', {
+                    {getFieldDecorator('repairphone2', {
                       rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
-                      initialValue: current.masterphone2,
-                    })(<Input placeholder="请输入手机号" />)}
+                      initialValue: current.relationList.repairphone2,
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
                   </FormItem>
                 </Col>
               </Row>
+
+              <Row gutter={24}>
+                <Col {...this.colLayout}>
+                  <FormItem label="车辆关系">
+                    {getFieldDecorator('repairrelationship3', {
+                      initialValue: !!current.relationList.repairrelationship3 && String(current.relationList.repairrelationship3) || '2',
+                    })(
+                      <Select
+                        disabled
+                        allowClear
+                        placeholder="请选择车辆关系"
+                      >
+                        <Option value="0"></Option>
+                        <Option value="1">车主关系</Option>
+                        <Option value="2">送修关系</Option>
+                      </Select>
+                    )}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="会员编码">
+                    {getFieldDecorator('repaircode3', {
+                      initialValue: current.relationList.repaircode3,
+                    })(<Input disabled={isView} placeholder="请输入会员编码" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="会员姓名">
+                    {getFieldDecorator('repairname3', {
+                      initialValue: current.relationList.repairname3,
+                    })(<Input disabled={isView} placeholder="请输入会员姓名" />)}
+                  </FormItem>
+                </Col>
+                <Col {...this.colLayout}>
+                  <FormItem label="手机号">
+                    {getFieldDecorator('repairphone3', {
+                      rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
+                      initialValue: current.relationList.repairphone3,
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
+                  </FormItem>
+                </Col>
+              </Row>
+
               <Row gutter={24}>
                 <Col md={24}>
                   <FormItem label="车辆备注">
                     {getFieldDecorator('description', {
                       initialValue: current.description,
-                    })(<TextArea style={{ minHeight: 32 }} placeholder="请输入车辆备注" rows={4} />)}
+                    })(<TextArea style={{ minHeight: 32 }} disabled={isView} placeholder="请输入车辆备注" rows={4} />)}
                   </FormItem>
                 </Col>
               </Row>
             </div>
 
           </Form>
+          <SearchModel
+            modalVisible={modalVisible}
+            {...parentMethods}
+            {...parentProps}
+          />
         </Spin>
-        <Button type="primary" style={{ position: 'fixed', bottom: '15px', right: '20px' }} onClick={this.validate} loading={loadings}>
+        <Button disabled={isView} type="primary" style={{ position: 'fixed', bottom: '15px', right: '20px' }} onClick={this.validate} loading={loadings}>
           提交
         </Button>
       </Fragment>

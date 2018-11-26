@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react';
 import { Tree, Input } from 'antd';
-
+import styles from './index.less';
 const TreeNode = Tree.TreeNode;
 const Search = Input.Search;
 
@@ -66,6 +66,7 @@ class RoleTree extends PureComponent {
     this.state = {
       expandedKeys: props.value,
       checkedKeys: props.value,
+      treeData:props.treeData||[],
       searchValue: '',
       autoExpandParent: true,
     }
@@ -80,16 +81,17 @@ class RoleTree extends PureComponent {
   }
 
   onCheck = (checkedKeys) => {
-    const { onChange }=this.props;
+    const { onChange } = this.props;
     this.setState({ checkedKeys });
     onChange(checkedKeys);
   }
 
   onChange = (e) => {
+    const {treeData}=this.state;
     const value = e.target.value;
     const expandedKeys = dataList.map((item) => {
       if (item.title.indexOf(value) > -1) {
-        return getParentKey(item.key, gData);
+        return getParentKey(item.key, treeData);
       }
       return null;
     }).filter((item, i, self) => item && self.indexOf(item) === i);
@@ -101,6 +103,7 @@ class RoleTree extends PureComponent {
   }
 
   render() {
+    const { disabled = false, treeData } = this.props;
     const { searchValue, expandedKeys, checkedKeys, autoExpandParent } = this.state;
     const loop = data => data.map((item) => {
       const index = item.title.indexOf(searchValue);
@@ -123,18 +126,21 @@ class RoleTree extends PureComponent {
       return <TreeNode key={item.key} title={title} />;
     });
     return (
-      <div>
-        <Search style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />
-        <Tree
-          checkable
-          onExpand={this.onExpand}
-          checkedKeys={checkedKeys}
-          onCheck={this.onCheck}
-          expandedKeys={expandedKeys}
-          autoExpandParent={autoExpandParent}
-        >
-          {loop(gData)}
-        </Tree>
+      <div style={{ position: "relative" }}>
+        <Search disabled={disabled} style={{ marginBottom: 8 }} placeholder="Search" onChange={this.onChange} />
+        <div className={styles.TreeScroll}>
+          <Tree
+            disabled={disabled}
+            checkable
+            onExpand={this.onExpand}
+            checkedKeys={checkedKeys}
+            onCheck={this.onCheck}
+            expandedKeys={expandedKeys}
+            autoExpandParent={autoExpandParent}
+          >
+            {loop(treeData)}
+          </Tree>
+        </div>
       </div>
     );
   }

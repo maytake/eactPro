@@ -10,7 +10,7 @@ export default {
   effects: {
     *becomeMember({ payload, callback }, { call, put }) {
       const response = yield call(joinMember, payload);
-      if(!response){return;}
+    
       if (response.errCode === 0) {
         yield put({
           type: 'memberInfoResult',

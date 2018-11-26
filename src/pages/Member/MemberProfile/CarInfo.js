@@ -3,6 +3,7 @@ import React, { PureComponent, Fragment } from 'react';
 import { Row, Col, Icon, Select, Badge, Form, Button, Modal, message, Table, Tooltip } from 'antd';
 import { connect } from 'dva';
 import Link from 'umi/link';
+import router from 'umi/router';
 import { AddKey } from '@/utils/utils';
 import styles from './AddMember.less';
 import loading from "../../../layouts/BasicLayout";
@@ -12,7 +13,7 @@ const FormItem = Form.Item;
 @connect(({ carInfo, loading }) => ({
     carInfo,
     loadings: loading.effects['carInfo/getCarInfo'],
-    subLoadings:loading.effects['carInfo/stop'],
+    subLoadings: loading.effects['carInfo/stop'],
 }))
 @Form.create()
 class CarInfo extends PureComponent {
@@ -20,10 +21,10 @@ class CarInfo extends PureComponent {
         super(props);
         this.state = {
             modalVisible: false,
-            carId:'',
+            carId: '',
 
         }
-        this.okHandle=this.okHandle.bind(this);
+        this.okHandle = this.okHandle.bind(this);
     }
 
     componentDidMount() {
@@ -79,6 +80,14 @@ class CarInfo extends PureComponent {
         });
     };
 
+    Edit = (carId) => {
+        const id = this.props.location.query.id;
+        router.push({
+            pathname: '/member/memberProfile/addMember/carInfo/addCarInfo',
+            query: { carId, id }
+        })
+    }
+
     SwitchStatus(key, status, id) {
         const { dispatch } = this.props;
         if (status !== 1) {
@@ -94,32 +103,32 @@ class CarInfo extends PureComponent {
         } else {
             this.handleModalVisible(true);
             this.setState({
-                carId:id,
+                carId: id,
             })
         }
     };
 
     okHandle(e) {
         e.preventDefault();
-        const {form,dispatch}=this.props;
-            const {carId}=this.state;
-            form.validateFields((err, fieldsValue) => {
+        const { form, dispatch } = this.props;
+        const { carId } = this.state;
+        form.validateFields((err, fieldsValue) => {
             if (err) return;
             form.resetFields();
             dispatch({
                 type: 'carInfo/stop',
                 payload: {
                     pkMembermgcar: carId,
-                    stopReason:fieldsValue.stopReason,
+                    stopReason: fieldsValue.stopReason,
                 },
                 callback: () => {
                     this.handleModalVisible();
                     this.setState({
-                        carId:'',
+                        carId: '',
                     })
                     this.getData();
                 }
-            }); 
+            });
         });
     }
 
@@ -152,10 +161,19 @@ class CarInfo extends PureComponent {
                 dataIndex: 'carframeno',
                 key: 'carframeno',
                 render: (text, record) => {
-                    const carId =record.pkMembermgcar
-                    const id=this.props.location.query.id;
+                    const carId = record.pkMembermgcar
+                    const id = this.props.location.query.id;
                     return (
-                        <Link to={{ pathname: '/member/memberProfile/addMember/carInfo/addCarInfo' , query : {carId, id }}}> {text }</Link>
+                        <Link to={{ 
+                            pathname: '/member/memberProfile/addMember/carInfo/addCarInfo', 
+                            query: { 
+                                carId, 
+                                id,
+                                view:'true', } 
+                            }}
+                        > 
+                            {text}
+                        </Link>
                     );
                 },
             },
@@ -199,7 +217,7 @@ class CarInfo extends PureComponent {
                 key: 'defaultcar',
                 render: (text, record) => {
                     const isDefault = record.membercust.defaultCarId === record.pkMembermgcar;
-                    const isStop = record.vstatus  !== 1
+                    const isStop = record.vstatus !== 1
                     return (
                         <Fragment>
                             <Tooltip title='是否设置为默认车辆'>
@@ -228,6 +246,14 @@ class CarInfo extends PureComponent {
                                 <Button
                                     icon={canstop ? 'play-circle' : 'pause-circle'}
                                     onClick={({ key }) => this.SwitchStatus(key, record.vstatus, record.pkMembermgcar)}
+                                    type="primary"
+                                    style={{ marginRight: '8px' }}
+                                />
+                            </Tooltip>
+                            <Tooltip title="编辑">
+                                <Button
+                                    icon="edit"
+                                    onClick={() => this.Edit(record.pkMembermgcar)}
                                     type="primary"
                                     style={{ marginRight: '8px' }}
                                 />
@@ -271,7 +297,7 @@ class CarInfo extends PureComponent {
                     >
 
                         <FormItem
-                            labelCol={{ span: 5 }} 
+                            labelCol={{ span: 5 }}
                             wrapperCol={{ span: 15 }}
                             label="原因"
                         >
@@ -279,7 +305,7 @@ class CarInfo extends PureComponent {
                                 rules: [{ required: true, message: '请选择原因!' }],
                             })(
                                 <Select
-                                    style={{width:'100%'}}
+                                    style={{ width: '100%' }}
                                     placeholder="请选择原因!"
                                     onChange={this.handleSelectChange}
                                 >

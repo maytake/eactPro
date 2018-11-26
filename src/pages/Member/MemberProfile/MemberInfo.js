@@ -8,18 +8,15 @@ import {
   DatePicker,
   Input,
   Select,
-  message,
   Upload,
   Cascader,
   Spin,
 } from 'antd';
 import moment from 'moment';
 import { connect } from 'dva';
-import Link from 'umi/link';
 import router from 'umi/router';
 import styles from './MemberInfo.less';
 import citys from '@/utils/geographic';
-const Search = Input.Search;
 const FormItem = Form.Item;
 const { Option, OptGroup } = Select;
 
@@ -67,7 +64,6 @@ class MemberInfo extends PureComponent {
     }
   }
 
-
   getAvatarURL() {
     const { currentUser } = this.props;
     if (currentUser.avatar) {
@@ -85,7 +81,7 @@ class MemberInfo extends PureComponent {
       addMemberProfile: { dataSource },
       location,
     } = this.props;
-    const id=location.query.id;
+    const id = location.query.id;
     const entity = Object.keys(dataSource).length !== 0 && dataSource.entity;
     validateFieldsAndScroll((error, values) => {
       if (!error) {
@@ -109,11 +105,11 @@ class MemberInfo extends PureComponent {
           idcradAddress: null,
           dateofbirth: dateofbirth && dateofbirth.format('YYYY-MM-DD HH:mm:ss'),
           firstStartTime: firstStartTime && firstStartTime.format('YYYY-MM-DD HH:mm:ss'),
-          source:source === '新数据'  ? 0 : 1,
+          source: source === '新数据' ? 0 : 1,
         };
         const params = { ...entity, ...newData, }
         console.log(params)
-        if(id){
+        if (id) {
           dispatch({
             type: 'addMemberProfile/update',
             payload: {
@@ -128,7 +124,7 @@ class MemberInfo extends PureComponent {
               });
             }
           });
-        }else{
+        } else {
           dispatch({
             type: 'addMemberProfile/create',
             payload: {
@@ -149,8 +145,10 @@ class MemberInfo extends PureComponent {
     const {
       form: { getFieldDecorator },
       loadings,
+      location,
       addMemberProfile: { dataSource, memberTags },
     } = this.props;
+    const isView = location.query.view&&true||false;
     if (Object.keys(dataSource).length === 0) { return null; }
     const entity = dataSource.entity;
     const current = entity || {};
@@ -179,13 +177,12 @@ class MemberInfo extends PureComponent {
     }
 
     const getOption = (data = [], name) => {
-      return data.map((item, i) => (
+      return data.map((item) => (
         <Option key={item[name]} value={item[name]}>
           {item[name]}
         </Option>
       ));
     }
-
 
     return (
       <Fragment>
@@ -236,18 +233,19 @@ class MemberInfo extends PureComponent {
                         {getFieldDecorator('name', {
                           rules: [{ required: true, message: '请输入会员姓名!' }],
                           initialValue: current.name,
-                        })(<Input placeholder="请输入会员姓名！" />)}
+                        })(<Input disabled={isView} placeholder="请输入会员姓名！" />)}
                       </FormItem>
                     </Col>
                     <Col {...this.colLayout}>
                       <FormItem label="会员性别">
                         {getFieldDecorator('sex', {
                           rules: [{ required: true, message: '请选择会员性别!' }],
-                          initialValue: current.sex && String(current.sex) || undefined,
+                          initialValue: !!current.sex && String(current.sex) || undefined,
                         })(
                           <Select
                             allowClear
                             style={{ width: '100%' }}
+                            disabled={isView}
                             placeholder="请选择会员性别"
                             help="会员性别可多选"
                           >
@@ -264,7 +262,7 @@ class MemberInfo extends PureComponent {
                             { pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }
                           ],
                           initialValue: current.mobilephone,
-                        })(<Input placeholder="请输入手机号" />)}
+                        })(<Input disabled={isView} placeholder="请输入手机号" />)}
                       </FormItem>
                     </Col>
                   </Row>
@@ -273,11 +271,12 @@ class MemberInfo extends PureComponent {
                       <FormItem label="证件类型">
                         {getFieldDecorator('paperstype', {
                           rules: [{ required: true, message: '请选择证件类型!' }],
-                          initialValue: current.paperstype && String(current.paperstype) || undefined,
+                          initialValue: !!current.paperstype && String(current.paperstype) || undefined,
                         })(
                           <Select
                             allowClear
                             style={{ width: '100%' }}
+                            disabled={isView}
                             placeholder="请选择证件类型"
                             help="证件类型"
                           >
@@ -299,7 +298,7 @@ class MemberInfo extends PureComponent {
                             { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '请输入15-18位证件号!' }
                           ],
                           initialValue: current.paperscode,
-                        })(<Input placeholder="请输入证件号" />)}
+                        })(<Input disabled={isView} placeholder="请输入证件号" />)}
                       </FormItem>
                     </Col>
                     <Col {...this.colLayout}>
@@ -310,6 +309,7 @@ class MemberInfo extends PureComponent {
                           <Select
                             allowClear
                             mode="tags"
+                            disabled={isView}
                             placeholder="请选择会员标签(多选)"
                             showSearch
                           >
@@ -325,7 +325,7 @@ class MemberInfo extends PureComponent {
 
                           initialValue: current.residentialAddress && current.residentialAddress.split(','),
                         })(
-                          <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
+                          <Cascader style={{ width: '100%' }} options={citys} disabled={isView} placeholder="请选择省份" />
                         )}
                       </FormItem>
                     </Col>
@@ -337,6 +337,7 @@ class MemberInfo extends PureComponent {
                         })(
                           <Input
                             className="cascader-adress"
+                            disabled={isView}
                             placeholder="请输入具体地址"
                           />
                         )}
@@ -387,7 +388,7 @@ class MemberInfo extends PureComponent {
                       <FormItem label="数据来源">
                         {getFieldDecorator('source', {
 
-                          initialValue: (current.source === null || current.source === 0 )? '新数据' : '历史数据',
+                          initialValue: (current.source === null || current.source === 0) ? '新数据' : '历史数据',
                         })(<Input disabled placeholder="请输入数据来源" />)}
                       </FormItem>
                     </Col>
@@ -419,7 +420,7 @@ class MemberInfo extends PureComponent {
                         pattern: /^[1-9][0-9]{4,14}$/, message: '请输入正确的QQ号码！',
                       }],
                       initialValue: current.qq,
-                    })(<Input placeholder="请输入QQ号" />)}
+                    })(<Input disabled={isView} placeholder="请输入QQ号" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -437,7 +438,7 @@ class MemberInfo extends PureComponent {
                         pattern: /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/, message: '请输入正确的E-mail！',
                       }],
                       initialValue: current.mail,
-                    })(<Input placeholder="请输入E-mail" />)}
+                    })(<Input disabled={isView} placeholder="请输入E-mail" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -450,6 +451,7 @@ class MemberInfo extends PureComponent {
                     })(
                       <DatePicker
                         showTime
+                        disabled={isView}
                         placeholder="请选择"
                         format="YYYY-MM-DD HH:mm:ss"
                         style={{ width: '100%' }}
@@ -461,11 +463,12 @@ class MemberInfo extends PureComponent {
                   <FormItem label="婚姻状况">
                     {getFieldDecorator('marry', {
 
-                      initialValue: current.marry && String(current.marry) || undefined,
+                      initialValue: !!current.marry && String(current.marry) || undefined,
                     })(
                       <Select
                         allowClear
                         style={{ width: '100%' }}
+                        disabled={isView}
                         placeholder="请选择婚姻状况"
                       >
                         <Option value="0">请选择婚姻状况</Option>
@@ -479,11 +482,12 @@ class MemberInfo extends PureComponent {
                   <FormItem label="学历">
                     {getFieldDecorator('education', {
 
-                      initialValue: current.education && String(current.education) || undefined,
+                      initialValue: !!current.education && String(current.education) || undefined,
                     })(
                       <Select
                         allowClear
                         style={{ width: '100%' }}
+                        disabled={isView}
                         placeholder="请选择学历"
                       >
                         <Option value="0">请选择学历</Option>
@@ -500,12 +504,13 @@ class MemberInfo extends PureComponent {
                   <FormItem label="行业">
                     {getFieldDecorator('industry', {
 
-                      initialValue: current.industry && String(current.industry) || undefined,
+                      initialValue: !!current.industry && String(current.industry) || undefined,
                     })(
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="请选择行业"
+                        disabled={isView}
+placeholder="请选择行业"
                       >
                         {getOption(industry, 'value')}
                       </Select>
@@ -517,7 +522,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('workunit', {
 
                       initialValue: current.workunit,
-                    })(<Input placeholder="请输入公司名称" />)}
+                    })(<Input disabled={isView} placeholder="请输入公司名称" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -529,7 +534,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="请选择职务"
+                        disabled={isView}
+placeholder="请选择职务"
                       >
                         {getOption(occupaction, 'value')}
                       </Select>
@@ -545,7 +551,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="请选择期望的提醒服务"
+                        disabled={isView}
+placeholder="请选择期望的提醒服务"
                       >
                         {getOption(expectation, 'name')}
                       </Select>
@@ -561,7 +568,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="请选择期望的活动"
+                        disabled={isView}
+placeholder="请选择期望的活动"
                       >
                         {getOption(hopeActivity, 'name')}
                       </Select>
@@ -577,7 +585,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="请选择客户性质"
+                        disabled={isView}
+placeholder="请选择客户性质"
                       >
                         {getOption(unittype, 'value')}
                       </Select>
@@ -593,7 +602,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="休闲娱乐类"
+                        disabled={isView}
+placeholder="休闲娱乐类"
                       >
                         {getOption(entertainment, 'name')}
                       </Select>
@@ -609,7 +619,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="生活养生类"
+                        disabled={isView}
+placeholder="生活养生类"
                       >
                         {getOption(health, 'name')}
                       </Select>
@@ -625,7 +636,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="体育运动类"
+                        disabled={isView}
+placeholder="体育运动类"
                       >
                         {getOption(sport, 'name')}
                       </Select>
@@ -641,7 +653,8 @@ class MemberInfo extends PureComponent {
                       <Select
                         allowClear
                         style={{ width: '100%' }}
-                        placeholder="收藏品鉴类"
+                        disabled={isView}
+placeholder="收藏品鉴类"
                       >
                         {getOption(collection, 'name')}
                       </Select>
@@ -656,7 +669,8 @@ class MemberInfo extends PureComponent {
                     })(
                       <Input
                         className="cascader-adress"
-                        placeholder="其他：宅、上网、电子游戏、金融理财、其他"
+                        disabled={isView}
+placeholder="其他：宅、上网、电子游戏、金融理财、其他"
                       />
                     )}
                   </FormItem>
@@ -668,7 +682,7 @@ class MemberInfo extends PureComponent {
 
                       initialValue: current.usingAddresse && current.usingAddresse.split(','),
                     })(
-                      <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
+                      <Cascader style={{ width: '100%' }} options={citys} disabled={isView} placeholder="请选择省份" />
                     )}
                   </FormItem>
                 </Col>
@@ -680,7 +694,8 @@ class MemberInfo extends PureComponent {
                     })(
                       <Input
                         className="cascader-adress"
-                        placeholder="请输入具体地址"
+                        disabled={isView}
+placeholder="请输入具体地址"
                       />
                     )}
                   </FormItem>
@@ -692,7 +707,7 @@ class MemberInfo extends PureComponent {
 
                       initialValue: current.idcradAddress && current.idcradAddress.split(','),
                     })(
-                      <Cascader style={{ width: '100%' }} options={citys} placeholder="请选择省份" />
+                      <Cascader style={{ width: '100%' }} options={citys} disabled={isView} placeholder="请选择省份" />
                     )}
                   </FormItem>
                 </Col>
@@ -704,7 +719,8 @@ class MemberInfo extends PureComponent {
                     })(
                       <Input
                         className="cascader-adress"
-                        placeholder="请输入具体地址"
+                        disabled={isView}
+placeholder="请输入具体地址"
                       />
                     )}
                   </FormItem>
@@ -751,7 +767,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('remarkscontact', {
 
                       initialValue: current.remarkscontact,
-                    })(<Input placeholder="请输入联系人姓名" />)}
+                    })(<Input disabled={isView} placeholder="请输入联系人姓名" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -759,7 +775,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('contactperson', {
 
                       initialValue: current.contactperson,
-                    })(<Input placeholder="请输入与会员关系" />)}
+                    })(<Input disabled={isView} placeholder="请输入与会员关系" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -767,7 +783,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('remarksphone', {
                       rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
                       initialValue: current.remarksphone,
-                    })(<Input placeholder="请输入手机号" />)}
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -777,7 +793,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('remarkscontact1', {
 
                       initialValue: current.remarkscontact1,
-                    })(<Input placeholder="请输入联系人姓名" />)}
+                    })(<Input disabled={isView} placeholder="请输入联系人姓名" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -785,7 +801,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('contactperson1', {
 
                       initialValue: current.contactperson1,
-                    })(<Input placeholder="请输入与会员关系" />)}
+                    })(<Input disabled={isView} placeholder="请输入与会员关系" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -793,7 +809,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('remarksphone1', {
                       rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
                       initialValue: current.remarksphone1,
-                    })(<Input placeholder="请输入手机号" />)}
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -803,7 +819,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('remarkscontact2', {
 
                       initialValue: current.remarkscontact2,
-                    })(<Input placeholder="请输入联系人姓名" />)}
+                    })(<Input disabled={isView} placeholder="请输入联系人姓名" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -811,7 +827,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('contactperson2', {
 
                       initialValue: current.contactperson2,
-                    })(<Input placeholder="请输入与会员关系" />)}
+                    })(<Input disabled={isView} placeholder="请输入与会员关系" />)}
                   </FormItem>
                 </Col>
                 <Col {...this.colLayout}>
@@ -819,7 +835,7 @@ class MemberInfo extends PureComponent {
                     {getFieldDecorator('remarksphone2', {
                       rules: [{ pattern: /^1(3|4|5|7|8)\d{9}$/, message: '输入的手机号有误！' }],
                       initialValue: current.remarksphone2,
-                    })(<Input placeholder="请输入手机号" />)}
+                    })(<Input disabled={isView} placeholder="请输入手机号" />)}
                   </FormItem>
                 </Col>
               </Row>
@@ -827,7 +843,7 @@ class MemberInfo extends PureComponent {
 
           </Form>
         </Spin>
-        <Button type="primary" style={{ position: 'fixed', bottom: '15px', right: '20px' }} onClick={this.validate} loading={loadings}>
+        <Button disabled={isView} type="primary" style={{ position: 'fixed', bottom: '15px', right: '20px' }} onClick={this.validate} loading={loadings}>
           提交
         </Button>
       </Fragment>

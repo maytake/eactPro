@@ -184,7 +184,7 @@ export function isAntdPro() {
 }
 
 export function AddKey(dataList, keyVal){
-  if(dataList&&dataList.length!==0){
+  if(dataList&&dataList.length!==0&&dataList[0][keyVal]){
     const hasBarProperty = hasOwnProperty.call(dataList[0], "key");
     if(!hasBarProperty){
       const data= dataList.map(item=>{
@@ -193,6 +193,12 @@ export function AddKey(dataList, keyVal){
       });
       return data;
     }
+  }else{
+    const data= dataList.map(item=>{
+      item.key=Math.random().toString(36).substr(3,8);
+      return item;
+    });
+    return data;
   }
   return dataList;
 };
